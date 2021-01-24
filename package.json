@@ -1,5 +1,5 @@
 {
-  "name": "Caelum",
+  "name": "caelum",
   "version": "1.0.0",
   "description": "Caelum libraries for SSI",
   "main": "src/index.js",

@@ -30,13 +30,14 @@ module.exports = class DidDocument {
    * @param {*} serviceEndpoint Service endpoint
    */
   addService (id, type, serviceEndpoint) {
-    if (!this.subject.service) {
-      this.subject.service = []
+    if (!this.services) {
+      this.services = []
     }
-    this.subject.service.push({
+    this.services.push({
       id: this.subject.did + '#' + id,
       type,
       serviceEndpoint
     })
+    this.subject.service = JSON.stringify(this.services)
   }
 }
