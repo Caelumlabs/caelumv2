@@ -6,7 +6,6 @@ const Application = require('./lib/application')
 const DidDocument = require('./lib/diddoocument')
 const BigchainDB = require('./utils/bigchaindb')
 const driver = require('bigchaindb-driver')
-const { create } = require('handlebars')
 // const axios = require('axios')
 /**
  * Caelum main lin
@@ -74,10 +73,8 @@ module.exports = class Caelum {
   async loadOrganization (createTxId, did) {
     return new Promise((resolve, reject) => {
       let subject, applications, org
-      console.log('load => ***** ', createTxId)
       BigchainDB.getTransaction(this.conn, createTxId)
         .then(txInfo => {
-          console.log('txInfo => ***** ', txInfo)
           if (txInfo) {
             if (did !== txInfo.asset.data.did) {
               reject(new Error('Transaction Id does not correspond to the DID'))
@@ -93,9 +90,7 @@ module.exports = class Caelum {
         .then(async (result) => {
           org = result
           org.createTxId = createTxId
-          console.log('loadApps => ***** ' )
           for (let i = 0; i < applications.length; i++) {
-            console.log('loadApp => ' + applications[i].createTxId )
             const app = await this.loadApplication(applications[i].createTxId)
             org.addApplication(app)
           }
@@ -207,7 +202,6 @@ module.exports = class Caelum {
           return BigchainDB.transferAsset(this.conn, txCreated, org.keys, doc, newOwner)
         })
         .then(tx => {
-          console.log(tx)
           resolve(tx)
         })
     })

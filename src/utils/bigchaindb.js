@@ -86,10 +86,14 @@ module.exports = class BigchainDB {
   }
 
   static async getTransaction (conn, txId) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       conn.getTransaction(txId)
         .then(res => {
           resolve(res)
+        })
+        .catch(e => {
+          console.log(e)
+          reject(e)
         })
     })
   }
