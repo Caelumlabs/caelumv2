@@ -40,10 +40,9 @@ module.exports = class BigchainDB {
    * @returns {string} DID
    */
   static async createApp (conn, keypair, assetdata) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const metadata = {
-        datetime: new Date().toString(),
-        proof: ''
+        datetime: new Date().toString()
       }
       const tx = driver.Transaction.makeCreateTransaction(
         assetdata, metadata,
@@ -63,13 +62,14 @@ module.exports = class BigchainDB {
    * @param {object} subject passphrase to be used to calculate DID (string or JSON)
    * @returns {string} DID
    */
-  static async transferAsset (conn, txCreated, oldOwner, metadata, newOwner) {
+  static async transferAsset (conn, txCreated, oldOwner, type, metadata, newOwner) {
     return new Promise((resolve) => {
       const updateInfo = {
+        type: type,
         subject: metadata,
         datetime: new Date().toString()
       }
-      const output = driver.Transaction.makeOutput(driver.Transaction.makeEd25519Condition(newOwner.publicKey))
+      const output = driver.Transaction.makeOutput(driver.Transaction.makeEd25519Condition(newOwner))
       const condition = [{ tx: txCreated, output_index: 0 }]
       try {
         const createTranfer = driver.Transaction.makeTransferTransaction(condition, [output], updateInfo)
@@ -79,9 +79,7 @@ module.exports = class BigchainDB {
             resolve(retrievedTx.id)
           })
           .catch(e => console.log(e))
-      } catch (e) {
-        console.log(e)
-      }
+      } catch (e) { console.log(e) }
     })
   }
 
@@ -91,19 +89,19 @@ module.exports = class BigchainDB {
         .then(res => {
           resolve(res)
         })
-        .catch(e => {
-          console.log(e)
-          reject(e)
-        })
+        .catch(e => reject(e))
     })
   }
 
-  static async search (conn, search) {
+  static async searchMetadata (conn, search) {
     return new Promise((resolve) => {
-      conn.searchAssets(search)
-        .then(res => {
-          resolve(res)
-        })
+      conn.searchMetadata(search).then(res => { resolve(res) })
+    })
+  }
+
+  static async searchAsset (conn, search) {
+    return new Promise((resolve) => {
+      conn.searchAssets(search).then(res => { resolve(res) })
     })
   }
 
@@ -113,6 +111,16 @@ module.exports = class BigchainDB {
         .then(res => {
           resolve(res)
         })
+    })
+  }
+
+  static async getLastTransaction (conn, txId) {
+    return new Promise((resolve, reject) => {
+      conn.listTransactions(txId)
+        .then(res => {
+          resolve(res[res.length - 1])
+        })
+        .catch(e => reject(e))
     })
   }
 }

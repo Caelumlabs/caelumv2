@@ -5,11 +5,12 @@
 
 const CATEGORIES = [
   'NONE',
-  'APP',
-  'CERTIFICATE',
+  'APPS',
+  'DIDINFO',
+  'DIDDOC',
+  'VC',
   'INTEGRITY',
-  'VERIFIED',
-  'APPLICATION'
+  'DIDREF'
 ]
 
 /**
@@ -28,21 +29,17 @@ module.exports = class Application {
    *
    * @param {oject} subject App information.
    */
-  setSubject (subject) {
+  setSubject (name, type) {
     return new Promise((resolve, reject) => {
-      if (typeof subject !== 'object') {
-        reject(new Error('Invalid subject'))
-      } else if (typeof subject.name !== 'string' || subject.name.length === 0) {
+      if (typeof name !== 'string' || name.length === 0) {
         reject(new Error('Invalid Application Name'))
-      } else if (typeof subject.applicationCategory !== 'number' || !CATEGORIES[subject.applicationCategory]) {
-        reject(new Error('Invalid Application Category'))
-      } else if (typeof subject.version !== 'number' && subject.version < 1) {
-        reject(new Error('Invalid Application Category'))
+      } else if (typeof type !== 'number' || !CATEGORIES[type]) {
+        reject(new Error('Invalid Application Type'))
       } else {
-        this.subject = {}
-        this.subject.name = subject.name
-        this.subject.version = subject.version
-        this.subject.applicationCategory = subject.applicationCategory
+        this.subject = {
+          name: name,
+          type: type
+        }
         resolve(this)
       }
     })

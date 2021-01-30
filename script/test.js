@@ -54,7 +54,9 @@ const main = async () => {
   const createTxId = '3b70a8c07ef5efc164fbaecb2d17e2e1c4fe123861c8eb94bfdc95df392fcb70'
   const org = await caelum.loadOrganization(createTxId, did)
   await org.setKeys('crater equal delay slow adult today camera mango intact address age clap')
-  console.log(org)
+  // console.log('Organization', org)
+
+  console.log('Application', org.applications[0].subject)
 
   // await loadApp(org, 'b7f07cf5da9640d8f4d57191ff04521bf3addc6e452864f1a0b6ad7f0705644a')
   // await search()

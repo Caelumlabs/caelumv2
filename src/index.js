@@ -29,39 +29,10 @@ module.exports = class Caelum {
    *
    * @param {object} data Data can be a DID (string) or an object with {legalName and taxID}
    */
-  async newOrganization (subject) {
-    const organization = new Organization()
-    return organization.setSubject(subject)
-  }
-
-  /**
-   * saveOrganization. Save to BigchainDB the organization Object
-   *
-   * @param {object} org Data can be a DID (string) or an object with {legalName and taxID}
-   */
-  async saveOrganization (org) {
-    return new Promise((resolve, reject) => {
-      if (org instanceof Organization) {
-        const data = {
-          did: org.did,
-          subject: org.subject,
-          applications: []
-        }
-        for (let i = 0; i < org.applications.length; i++) {
-          data.applications.push({
-            createTxId: org.applications[i].createTxId,
-            name: org.applications[i].subject.name
-          })
-        }
-        BigchainDB.createApp(this.conn, org.keys, data)
-          .then(txId => {
-            org.createTxId = txId
-            resolve(org)
-          })
-      } else {
-        reject(new Error('org is not an Organization Class'))
-      }
-    })
+  async newOrganization () {
+    const organization = new Organization(this)
+    return organization
+    // return organization.setSubject(subject)
   }
 
   /**
@@ -72,31 +43,77 @@ module.exports = class Caelum {
    */
   async loadOrganization (createTxId, did) {
     return new Promise((resolve, reject) => {
-      let subject, applications, org
+      let org
       BigchainDB.getTransaction(this.conn, createTxId)
-        .then(txInfo => {
-          if (txInfo) {
-            if (did !== txInfo.asset.data.did) {
-              reject(new Error('Transaction Id does not correspond to the DID'))
-            } else {
-              subject = txInfo.asset.data.subject
-              applications = txInfo.asset.data.applications
-              return this.newOrganization(subject, did)
-            }
-          } else {
-            reject(new Error('Invalid txId ' + createTxId))
-          }
-        })
-        .then(async (result) => {
-          org = result
-          org.createTxId = createTxId
-          for (let i = 0; i < applications.length; i++) {
-            const app = await this.loadApplication(applications[i].createTxId)
-            org.addApplication(app)
+        .then(async txInfo => {
+          if (!txInfo) reject(new Error('Invalid txId ' + createTxId))
+          else if (did !== txInfo.asset.data.did) reject(new Error('Transaction Id does not correspond to the DID'))
+          else if (txInfo.asset.data.type !== 2) reject(new Error('This is not an organization'))
+          else {
+            org = new Organization(this, createTxId, did)
+            await org.loadInformation()
+            await org.loadDidDocument(txInfo.asset.data.diddocument)
+            await org.loadApplications(txInfo.asset.data.applications)
+            // await org.loadVerified(txInfo.asset.data.verified)
           }
           resolve(org)
         })
         .catch(e => reject(e))
+    })
+  }
+
+  /**
+   * Gets one certificate and it's owner
+   *
+   * @param {string} certificateId Certificate ID
+   */
+  async getCertificate (certificateId) {
+    const cert = {
+      txIds: {}
+    }
+    return new Promise((resolve, reject) => {
+      // 1. Get transaction for the certificate
+      BigchainDB.getTransaction(this.conn, certificateId)
+        .then(txInfo => {
+          if (txInfo.metadata.type !== 5) reject(new Error('not a certificate'))
+          else {
+            cert.subject = txInfo.metadata.subject
+            cert.datetime = txInfo.metadata.datetime
+            cert.txIds.nodeAppDocs = txInfo.asset.id
+            cert.txIds.certificateId = txInfo.id
+            // 2. Search the Apps Node
+            return BigchainDB.searchMetadata(this.conn, cert.txIds.nodeAppDocs)
+          }
+        })
+        .then(results => {
+          // 3. Filter the App
+          for (let i = 0; i < results.length; i++) {
+            const certificates = results[i].metadata?.subject?.certificates || false
+            if (certificates === cert.txIds.nodeAppDocs) {
+              cert.txIds.appId = results[i].id
+              return BigchainDB.getTransaction(this.conn, cert.txIds.appId)
+            }
+          }
+        })
+        .then(tx => {
+          cert.txIds.didAppsId = tx.asset.id
+          return BigchainDB.searchAsset(this.conn, cert.txIds.didAppsId)
+        })
+        .then(results => {
+          for (let i = 0; i < results.length; i++) {
+            const applications = results[i].data?.applications || false
+            if (applications === cert.txIds.didAppsId) {
+              cert.did = results[i].data.did
+              cert.createTxId = results[i].id
+              resolve(cert)
+            }
+          }
+          resolve(false)
+        })
+        .catch((e) => {
+          console.log(e)
+          resolve(false)
+        })
     })
   }
 
@@ -109,7 +126,7 @@ module.exports = class Caelum {
       BigchainDB.getTransaction(this.conn, createTxId)
         .then(txInfo => {
           const app = new Application()
-          return app.setSubject(txInfo.asset.data)
+          return app.setSubject(txInfo.asset.data.name, txInfo.asset.data.type)
         }).then(result => {
           app = result
           app.createTxId = createTxId
@@ -119,31 +136,6 @@ module.exports = class Caelum {
           app.transactions = transactions
           resolve(app)
         })
-    })
-  }
-
-  /**
-   * Adds an app to one organization.
-   *   - legalName : string
-   *   - taxID : Valid taxId for the country
-   *   - countryCode : isISO31661Alpha2 (valid countryCode, 'ES', 'FR',....)
-   */
-  saveApplication (org, appData) {
-    return new Promise((resolve, reject) => {
-      if (org instanceof Organization) {
-        const app = new Application()
-        app.setSubject(appData)
-          .then(() => {
-            return BigchainDB.createApp(this.conn, org.keys, appData)
-          })
-          .then(txId => {
-            app.createTxId = txId
-            org.addApplication(app)
-            resolve(app)
-          })
-      } else {
-        reject(new Error('org is not an Organization Class'))
-      }
     })
   }
 
@@ -166,43 +158,6 @@ module.exports = class Caelum {
       BigchainDB.search(this.conn, s)
         .then(results => {
           resolve(results)
-        })
-    })
-  }
-
-  /**
-   * Get las non-spent App Doc
-   * @param {Array} apps Applications for th eorg
-   * @param {number} applicationCategory Category
-   */
-  getLastAppDoc (apps, applicationCategory) {
-    return new Promise((resolve) => {
-      const app = apps.find(item => item.subject.applicationCategory === applicationCategory)
-      this.conn.listTransactions(app.createTxId)
-        .then(transactions => {
-          resolve(transactions[transactions.length - 1])
-        })
-    })
-  }
-
-  /**
-   * Loads an app from BigchainDB.
-   */
-  addAppDoc (org, doc, updateOwner = false, applicationCategory) {
-    let txCreated
-    return new Promise((resolve, reject) => {
-      this.getLastAppDoc(org.applications, applicationCategory)
-        .then(result => {
-          txCreated = result
-          if (!txCreated) reject(new Error('Invalid txId'))
-          else if (updateOwner !== false) return BigchainDB.getKeys(updateOwner)
-          else resolve(org.keys)
-        })
-        .then(newOwner => {
-          return BigchainDB.transferAsset(this.conn, txCreated, org.keys, doc, newOwner)
-        })
-        .then(tx => {
-          resolve(tx)
         })
     })
   }
