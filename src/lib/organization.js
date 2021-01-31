@@ -103,13 +103,15 @@ module.exports = class Organization {
   /**
    * Save Information : Verifiable Credential
    */
-  saveInformation () {
+  saveInformation (pub = false) {
     return new Promise((resolve) => {
       BigchainDB.getLastTransaction(this.caelum.conn, this.createTxId)
         .then(lastTx => {
+          // TODO: Check is a valid public Key
+          const publicKey = ((pub === false) ? this.keys.publicKey : pub)
           const cloneSubject = { ...this.subject }
           cloneSubject.location = JSON.stringify(cloneSubject.location)
-          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INFO_TYPE, cloneSubject, this.keys.publicKey)
+          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INFO_TYPE, cloneSubject, publicKey)
         })
         .then((tx) => {
           resolve(tx)
@@ -167,11 +169,31 @@ module.exports = class Organization {
    * Save Information : Verifiable Credential
    * @param {object} subject VC credential
    */
-  saveDidDocument (subject) {
+  saveDidDocument (subject, pub = false) {
     return new Promise((resolve) => {
       BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.diddocument)
         .then(lastTx => {
-          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDDOC_TYPE, subject, this.keys.publicKey)
+          // TODO: Check is a valid public Key
+          const publicKey = ((pub === false) ? this.keys.publicKey : pub)
+          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDDOC_TYPE, subject, publicKey)
+        })
+        .then((tx) => {
+          resolve(tx)
+        })
+    })
+  }
+
+  /**
+   * Save Information : Verifiable Credential
+   * @param {object} subject VC credential
+   */
+  saveVerified (did, pub = false) {
+    return new Promise((resolve) => {
+      BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.verified)
+        .then(lastTx => {
+          // TODO: Check is a valid public Key
+          const publicKey = ((pub === false) ? this.keys.publicKey : pub)
+          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDLIST_TYPE, { did }, publicKey)
         })
         .then((tx) => {
           resolve(tx)
@@ -309,7 +331,7 @@ module.exports = class Organization {
   /**
    * Add a certificate App to the hashlist
    */
-  async addCertificateApp () {
+  async addCertificateApp (pub = false) {
     // Create twho nodes for the App certificates : certifivates (VC) and issued (DIDs)
     const issuedTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Issued', type: TX_DIDLIST_TYPE })
     const acceptedTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Accepted', type: TX_DIDLIST_TYPE })
@@ -317,7 +339,8 @@ module.exports = class Organization {
     // Add a new application to the app list
     const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.applications)
     const metadata = { name: 'Certificates', certificates: certsTxId, issued: issuedTxId, accepted: acceptedTxId }
-    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_CERTLIST_TYPE, metadata, this.keys.publicKey)
+    const publicKey = ((pub === false) ? this.keys.publicKey : pub)
+    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_CERTLIST_TYPE, metadata, publicKey)
     const app = { createTxId: txId, type: TX_CERTLIST_TYPE, subject: metadata }
     this.applications.push(app)
     return app
@@ -402,13 +425,14 @@ module.exports = class Organization {
   /**
    * Add a certificate App to the hashlist
    */
-  async addHashingApp () {
+  async addHashingApp (pub = false) {
     // Create twho nodes for the App certificates : certifivates (VC) and issued (DIDs)
     const integrityTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Integrity', type: TX_INTEGRITY_TYPE })
     // Add a new application to the app list
     const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.applications)
     const metadata = { name: 'Integrity', integrity: integrityTxId }
-    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INTEGRITY_TYPE, metadata, this.keys.publicKey)
+    const publicKey = ((pub === false) ? this.keys.publicKey : pub)
+    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INTEGRITY_TYPE, metadata, publicKey)
     const app = { createTxId: txId, type: TX_INTEGRITY_TYPE, subject: metadata }
     this.applications.push(app)
     return app

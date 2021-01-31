@@ -161,4 +161,17 @@ module.exports = class Caelum {
         })
     })
   }
+
+  /**
+   * Get the Keys for a mnemonic
+   *
+   * @param {string} mnemonic Seed. If false will create a new pair of keys.
+   */
+  getKeys (mnemonic = false) {
+    return new Promise((resolve, reject) => {
+      BigchainDB.getKeys(mnemonic)
+        .then(result => { resolve(result) })
+        .catch((e) => { reject(e) })
+    })
+  }
 }
