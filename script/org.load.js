@@ -57,6 +57,7 @@ const main = async () => {
   // const listOfIssuedTags = await generalitat.getIssuedCertificates(tagProximitat)
   log('\n' + chalk.grey('Empresa : ') + chalk.cyan(generalitat.subject.legalName))
   log(chalk.grey('Emet TAG : ') + chalk.cyan(generalitat.certificates[0].subject.title))
+  // console.log(generalitat.certificates[0])
 
   // Issue Tags
   // await generalitat.issueCertificate(tagProximitat, receivers.bbhotel.did, 'issued')
