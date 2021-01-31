@@ -39,12 +39,19 @@ const main = async () => {
   await labs.issueCertificate(tagProvider, develInfo.did, 'issued')
   */
 
+  // await labs.setKeys('feature vast tool embark door chair album major tray find wine salon')
+  // await labs.saveInformation()
+
+  await labs.setKeys('say page outside infant prevent gallery athlete light half hybrid void boil')
+  await labs.addHashingApp()
+
   const devel = await caelum.loadOrganization(develInfo.createTxId, develInfo.did)
   await devel.setKeys(develInfo.mnemonic)
   log('\n' + chalk.grey('Empresa : ') + chalk.cyan(devel.subject.legalName))
   // await devel.acceptCertificate(tagProvider, labs.did)
   const tags = await devel.searchCertificates()
   logTags(tags)
+
 
   /*
   // Update - Basic Information

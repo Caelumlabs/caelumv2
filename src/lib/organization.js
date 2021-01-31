@@ -111,6 +111,7 @@ module.exports = class Organization {
           const publicKey = ((pub === false) ? this.keys.publicKey : pub)
           const cloneSubject = { ...this.subject }
           cloneSubject.location = JSON.stringify(cloneSubject.location)
+          console.log(publicKey)
           return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INFO_TYPE, cloneSubject, publicKey)
         })
         .then((tx) => {
@@ -425,9 +426,10 @@ module.exports = class Organization {
   /**
    * Add a certificate App to the hashlist
    */
-  async addHashingApp (pub = false) {
+  async addHashingApp (pub = false, newKeys = false) {
     // Create twho nodes for the App certificates : certifivates (VC) and issued (DIDs)
-    const integrityTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Integrity', type: TX_INTEGRITY_TYPE })
+    const keys = (newKeys === false) ? this.keys : newKeys
+    const integrityTxId = await BigchainDB.createApp(this.caelum.conn, keys, { name: 'Integrity', type: TX_INTEGRITY_TYPE })
     // Add a new application to the app list
     const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.applications)
     const metadata = { name: 'Integrity', integrity: integrityTxId }
@@ -472,7 +474,6 @@ module.exports = class Organization {
     return hashList
   }
 
-  /**
   /**
    * Set the keys for this organization
    *
