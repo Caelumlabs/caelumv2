@@ -54,7 +54,7 @@ module.exports = class Caelum {
             await org.loadInformation()
             await org.loadDidDocument(txInfo.asset.data.diddocument)
             await org.loadApplications(txInfo.asset.data.applications)
-            // await org.loadVerified(txInfo.asset.data.verified)
+            org.nodes.verified = txInfo.asset.data.verified
           }
           resolve(org)
         })

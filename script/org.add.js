@@ -16,6 +16,7 @@ const addCaelum = async () => {
   await org.setSubject({ legalName: 'Caelum Corp', network: 'tabit', countryCode: 'ES', taxID: 'B67474304'})
   await org.saveInformation()
 
+  /*
   // Add first certificate
   await org.addCertificate({
     title: 'Caelum Provider',
@@ -24,6 +25,7 @@ const addCaelum = async () => {
     logo: 'https://caelumlabs.com/wp-content/uploads/2019/05/caelumlabs-logo.svg',
     learningAchievement: 'To be working with Caelum Labs'
   })
+  */
   log('\n' + chalk.grey('Empresa : ') + chalk.cyan('Caelum Labs'))
   log(chalk.grey(' - DID  : ') + chalk.magenta(did))
   log(chalk.grey(' - TxID : ') + chalk.magenta(org.createTxId))
@@ -50,7 +52,7 @@ const addProv1 = async () => {
 }
 const main = async () => {
   await addCaelum()
-  await addProv1()
+  // await addProv1()
   process.exit()
 }
 

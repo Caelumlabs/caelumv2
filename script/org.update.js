@@ -5,9 +5,9 @@ const chalk = require('chalk')
 const log = console.log
 
 const caelumLabs = {
-  did: '2RsEvZvZhvrGqUcgfRHLMkjPniiKqcJrF3phv8G9q4bJ',
-  createTxId: '9337af6a61c9f300f9a2e0f95c344606733285a1052ac3ef0232a1ef9bb45e57',
-  mnemonic: 'foil reward album sniff garlic august artist feature habit pattern clutch ostrich'
+  did: 'CnU8Yo6e1sXmHr4oo8uzLzB7PdYEerMfCHVaLgLDjxXb',
+  createTxId: 'd45848ab869a37fc4ea85b441e5a519477e3981dfc2efd7d2d2b183bf38ef336',
+  mnemonic: 'seven release open sample monkey finish hurdle joke what tattoo panel improve'
 }
 
 const develInfo = {
@@ -29,9 +29,10 @@ const main = async () => {
   log(chalk.blue('\n====================\nOrg Update\n===================='))
  
   const labs = await caelum.loadOrganization(caelumLabs.createTxId, caelumLabs.did)
+  console.log(labs.nodes)
   await labs.setKeys(caelumLabs.mnemonic)
   await labs.loadCertificates()
-  const tagProvider = labs.certificates[0].certificateId
+  // const tagProvider = labs.certificates[0].certificateId
   log('\n' + chalk.grey('Empresa : ') + chalk.cyan(labs.subject.legalName))
 
   /*
@@ -42,16 +43,17 @@ const main = async () => {
   // await labs.setKeys('feature vast tool embark door chair album major tray find wine salon')
   // await labs.saveInformation()
 
-  await labs.setKeys('say page outside infant prevent gallery athlete light half hybrid void boil')
-  await labs.addHashingApp()
+  // await labs.setKeys('say page outside infant prevent gallery athlete light half hybrid void boil')
+  // await labs.addHashingApp()
 
+  /*
   const devel = await caelum.loadOrganization(develInfo.createTxId, develInfo.did)
   await devel.setKeys(develInfo.mnemonic)
   log('\n' + chalk.grey('Empresa : ') + chalk.cyan(devel.subject.legalName))
   // await devel.acceptCertificate(tagProvider, labs.did)
   const tags = await devel.searchCertificates()
   logTags(tags)
-
+  */
 
   /*
   // Update - Basic Information

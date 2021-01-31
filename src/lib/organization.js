@@ -111,7 +111,6 @@ module.exports = class Organization {
           const publicKey = ((pub === false) ? this.keys.publicKey : pub)
           const cloneSubject = { ...this.subject }
           cloneSubject.location = JSON.stringify(cloneSubject.location)
-          console.log(publicKey)
           return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INFO_TYPE, cloneSubject, publicKey)
         })
         .then((tx) => {
