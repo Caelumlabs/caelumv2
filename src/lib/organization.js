@@ -69,14 +69,18 @@ module.exports = class Organization {
   /**
    * saveOrganization. Save to BigchainDB the organization Object
    */
-  saveOrganization () {
+  saveOrganization (legalName, taxID) {
     return new Promise((resolve) => {
       const data = {
         did: this.keys.publicKey,
         type: 2,
         diddocument: this.nodes.diddocument,
         verified: this.nodes.verified,
-        applications: this.nodes.applications
+        applications: this.nodes.applications,
+        subject: {
+          legalName: legalName,
+          taxID: taxID
+        }
       }
       BigchainDB.createApp(this.caelum.conn, this.keys, data)
         .then(txId => {
@@ -94,7 +98,11 @@ module.exports = class Organization {
     return new Promise((resolve) => {
       BigchainDB.getLastTransaction(this.caelum.conn, this.createTxId)
         .then(tx => {
-          if (tx.metadata.subject && tx.metadata.type === TX_INFO_TYPE) this.setSubject(tx.metadata.subject)
+          if (tx.operation === 'CREATE') {
+            this.setSubject(tx.asset.subject)
+          } else if (tx.metadata.subject && tx.metadata.type === TX_INFO_TYPE) {
+            this.setSubject(tx.metadata.subject)
+          }
           resolve()
         })
     })
@@ -159,8 +167,10 @@ module.exports = class Organization {
     return new Promise((resolve) => {
       BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.diddocument)
         .then(tx => {
-          this.lastDidDocument = (tx.metadata.type === TX_DIDDOC_TYPE) ? tx.metadata.subject : {}
-          this.lastDidDocument.service = JSON.parse(this.lastDidDocument.service)
+          if (tx.operation === 'TRANSFER') {
+            this.lastDidDocument = (tx.metadata.type === TX_DIDDOC_TYPE) ? tx.metadata.subject : {}
+            this.lastDidDocument.service = JSON.parse(this.lastDidDocument.service)
+          } else this.lastDidDocument = {}
           resolve()
         })
     })
