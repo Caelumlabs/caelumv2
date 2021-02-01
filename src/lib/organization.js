@@ -6,15 +6,21 @@ const Application = require('./application')
 const Achievement = require('./achievement')
 const Location = require('./location')
 
-const TX_APPLIST_TYPE = 1
-const TX_INFO_TYPE = 2
-const TX_DIDDOC_TYPE = 3
-// const TX_VC_TYPE = 4
-const TX_CERTLIST_TYPE = 5
-const TX_DIDLIST_TYPE = 6
-const TX_ACHIEVEMENT_TYPE = 7
-const TX_INTEGRITY_TYPE = 8
-// const TX_PRODUCT_TYPE = 9
+const TX_DID = 1
+const TX_INFO = 2
+const TX_DIDDOC_LIST = 3
+const TX_DIDDOC = 4
+const TX_VERIFIED_LIST = 5
+const TX_VERIFIED = 6
+const TX_APP_LIST = 7
+const TX_APP = 8
+const TX_TAGS = 9
+const TX_ISSUED = 10
+const TX_TAG_TYPE = 11
+const TX_INTEGRITY = 12
+const TX_HASH = 13
+// const TX_PRODUCT = 14
+// const TX_PROVENANCE = 15
 
 /**
  * Schema.org: Organization.
@@ -43,13 +49,13 @@ module.exports = class Organization {
       let subject
       switch (apptype) {
         case 'diddocument' :
-          subject = { name: 'Did Document', type: TX_DIDDOC_TYPE }
+          subject = { name: 'Did Document', type: TX_DIDDOC_LIST }
           break
         case 'verified' :
-          subject = { name: 'Verified DIDs', type: TX_DIDLIST_TYPE }
+          subject = { name: 'Verified DIDs', type: TX_VERIFIED_LIST }
           break
         case 'applications' :
-          subject = { name: 'Applications', type: TX_APPLIST_TYPE }
+          subject = { name: 'Applications', type: TX_APP_LIST }
           break
         default: reject(new Error('Invalid app type'))
       }
@@ -73,7 +79,7 @@ module.exports = class Organization {
     return new Promise((resolve) => {
       const data = {
         did: this.keys.publicKey,
-        type: 2,
+        type: TX_DID,
         diddocument: this.nodes.diddocument,
         verified: this.nodes.verified,
         applications: this.nodes.applications,
@@ -127,7 +133,7 @@ module.exports = class Organization {
           // TODO: Check is a valid public Key
           const publicKey = ((pub === false) ? this.keys.publicKey : pub)
           if (subject.location) subject.location = JSON.stringify(subject.location)
-          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INFO_TYPE, subject, publicKey)
+          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INFO, subject, publicKey)
         })
         .then((tx) => {
           resolve(tx)
@@ -176,7 +182,7 @@ module.exports = class Organization {
       BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.diddocument)
         .then(tx => {
           if (tx.operation === 'TRANSFER') {
-            this.lastDidDocument = (tx.metadata.type === TX_DIDDOC_TYPE) ? tx.metadata.subject : {}
+            this.lastDidDocument = (tx.metadata.type === TX_DIDDOC) ? tx.metadata.subject : {}
             this.lastDidDocument.service = JSON.parse(this.lastDidDocument.service)
           } else this.lastDidDocument = {}
           resolve()
@@ -194,7 +200,7 @@ module.exports = class Organization {
         .then(lastTx => {
           // TODO: Check is a valid public Key
           const publicKey = ((pub === false) ? this.keys.publicKey : pub)
-          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDDOC_TYPE, subject, publicKey)
+          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDDOC, subject, publicKey)
         })
         .then((tx) => {
           resolve(tx)
@@ -212,7 +218,7 @@ module.exports = class Organization {
         .then(lastTx => {
           // TODO: Check is a valid public Key
           const publicKey = ((pub === false) ? this.keys.publicKey : pub)
-          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDLIST_TYPE, { did }, publicKey)
+          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_VERIFIED, { did }, publicKey)
         })
         .then((tx) => {
           resolve(tx)
@@ -298,13 +304,13 @@ module.exports = class Organization {
    * @param {object} subject Subject of the certificate
    */
   async loadCertificates () {
-    const certApp = this.applications.find(item => item.type === TX_CERTLIST_TYPE)
+    const certApp = this.applications.find(item => item.type === TX_TAGS)
     if (!certApp) return (false)
     else {
       const certificates = await BigchainDB.listTransactions(this.caelum.conn, certApp.subject.certificates)
       for (let i = 0; i < certificates.length; i++) {
         if (certificates[i].operation === 'TRANSFER' &&
-          certificates[i].metadata.type === TX_CERTLIST_TYPE &&
+          certificates[i].metadata.type === TX_TAG_TYPE &&
           certificates[i].metadata.subject) {
           this.certificates.push({
             certificateId: certificates[i].id,
@@ -328,7 +334,7 @@ module.exports = class Organization {
         .then(async results => {
           for (let i = 0; i < results.length; i++) {
             const metadata = results[i].metadata
-            if ((metadata.type && metadata.type === TX_DIDLIST_TYPE) && (metadata.subject && metadata.subject.did === this.did)) {
+            if ((metadata.type && metadata.type === TX_ISSUED) && (metadata.subject && metadata.subject.did === this.did)) {
               const issued = results[i].metadata.subject
               if (['issued', 'revoked'].includes(issued.status)) {
                 let certificate = loadedCertificates.find(item => item.txIds.certificateId === issued.certificateId)
@@ -367,15 +373,15 @@ module.exports = class Organization {
    */
   async addCertificateApp (pub = false) {
     // Create twho nodes for the App certificates : certifivates (VC) and issued (DIDs)
-    const issuedTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Issued', type: TX_DIDLIST_TYPE })
-    const acceptedTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Accepted', type: TX_DIDLIST_TYPE })
-    const certsTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Certificates', type: TX_ACHIEVEMENT_TYPE })
+    const issuedTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Issued', type: TX_APP })
+    const acceptedTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Accepted', type: TX_APP })
+    const certsTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Certificates', type: TX_APP })
     // Add a new application to the app list
     const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.applications)
     const metadata = { name: 'Certificates', certificates: certsTxId, issued: issuedTxId, accepted: acceptedTxId }
     const publicKey = ((pub === false) ? this.keys.publicKey : pub)
-    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_CERTLIST_TYPE, metadata, publicKey)
-    const app = { createTxId: txId, type: TX_CERTLIST_TYPE, subject: metadata }
+    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_TAGS, metadata, publicKey)
+    const app = { createTxId: txId, type: TX_TAGS, subject: metadata }
     this.applications.push(app)
     return app
   }
@@ -385,14 +391,14 @@ module.exports = class Organization {
    * @param {object} subject Subject of the certificate
    */
   async addCertificate (subject) {
-    const achievement = new Achievement(subject, this.did)
-    let certApp = this.certificates.find(item => item.type === TX_CERTLIST_TYPE)
+    const achievement = new Achievement(subject)
+    let certApp = this.certificates.find(item => item.type === TX_TAGS)
     if (!certApp) {
       certApp = await this.addCertificateApp()
     }
     const certsTxId = certApp.subject.certificates
     const lastAppTx = await BigchainDB.getLastTransaction(this.caelum.conn, certsTxId)
-    return await BigchainDB.transferAsset(this.caelum.conn, lastAppTx, this.keys, TX_CERTLIST_TYPE, achievement.subject, this.keys.publicKey)
+    return await BigchainDB.transferAsset(this.caelum.conn, lastAppTx, this.keys, TX_TAG_TYPE, achievement.subject, this.keys.publicKey)
   }
 
   /**
@@ -401,14 +407,14 @@ module.exports = class Organization {
    */
   async issueCertificate (certificateId, did, issued = true) {
     // Get Tags App and cert
-    const certApp = this.applications.find(item => item.type === TX_CERTLIST_TYPE)
+    const certApp = this.applications.find(item => item.type === TX_TAGS)
     const certInfo = this.certificates.find(item => item.certificateId === certificateId)
     if (!certApp) throw (new Error('No Tags App found '))
     else if (!certInfo) throw (new Error('No certificate found with certificateId ' + certificateId))
     else {
       const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, certApp.subject.issued)
       const status = (issued ? 'issued' : 'revoked')
-      await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDLIST_TYPE, { certificateId, did, status }, this.keys.publicKey)
+      return await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
     }
   }
 
@@ -418,14 +424,14 @@ module.exports = class Organization {
    */
   async acceptCertificate (certificateId, did, accepted = true) {
     // Get Tags App. ADd one if this is the first time.
-    let certApp = this.applications.find(item => item.type === TX_CERTLIST_TYPE)
+    let certApp = this.applications.find(item => item.type === TX_TAGS)
     if (!certApp) {
       await this.addCertificateApp()
       certApp = this.applications[0]
     }
     const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, certApp.subject.accepted)
     const status = (accepted ? 'accepted' : 'not_accepted')
-    await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDLIST_TYPE, { certificateId, did, status }, this.keys.publicKey)
+    await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
   }
 
   /**
@@ -434,7 +440,7 @@ module.exports = class Organization {
    */
   async getIssuedCertificates (certificateId, issuedCerts = true) {
     const certificatesIssued = []
-    const certApp = this.applications.find(item => item.type === TX_CERTLIST_TYPE)
+    const certApp = this.applications.find(item => item.type === TX_TAGS)
     // const certApp = this.certificates.find(item => item.certificateId === certificateId)
     if (!certApp) return certificatesIssued
     else {
@@ -442,7 +448,7 @@ module.exports = class Organization {
       const issued = await BigchainDB.listTransactions(this.caelum.conn, statusList)
       for (let i = 0; i < issued.length; i++) {
         if (issued[i].operation === 'TRANSFER' &&
-          issued[i].metadata.type === TX_DIDLIST_TYPE &&
+          issued[i].metadata.type === TX_ISSUED &&
           issued[i].metadata.subject &&
           issued[i].metadata.subject.certificateId === certificateId) {
           certificatesIssued.push({
@@ -462,13 +468,13 @@ module.exports = class Organization {
   async addHashingApp (pub = false, newKeys = false) {
     // Create twho nodes for the App certificates : certifivates (VC) and issued (DIDs)
     const keys = (newKeys === false) ? this.keys : newKeys
-    const integrityTxId = await BigchainDB.createApp(this.caelum.conn, keys, { name: 'Integrity', type: TX_INTEGRITY_TYPE })
+    const integrityTxId = await BigchainDB.createApp(this.caelum.conn, keys, { name: 'Integrity', type: TX_APP })
     // Add a new application to the app list
     const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.applications)
     const metadata = { name: 'Integrity', integrity: integrityTxId }
     const publicKey = ((pub === false) ? this.keys.publicKey : pub)
-    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INTEGRITY_TYPE, metadata, publicKey)
-    const app = { createTxId: txId, type: TX_INTEGRITY_TYPE, subject: metadata }
+    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INTEGRITY, metadata, publicKey)
+    const app = { createTxId: txId, type: TX_INTEGRITY, subject: metadata }
     this.applications.push(app)
     return app
   }
@@ -477,13 +483,13 @@ module.exports = class Organization {
    * Adds a new hash.
    */
   async saveHash (metadata) {
-    let hashApp = this.applications.find(item => item.type === TX_INTEGRITY_TYPE)
+    let hashApp = this.applications.find(item => item.type === TX_INTEGRITY)
     if (!hashApp) {
       hashApp = await this.addHashingApp()
     }
     // TODO:Hash metadata and return txId
     const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, hashApp.subject.integrity)
-    await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDLIST_TYPE, metadata, this.keys.publicKey)
+    await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_HASH, metadata, this.keys.publicKey)
   }
 
   /**
@@ -491,12 +497,12 @@ module.exports = class Organization {
    */
   async loadHashes () {
     const hashList = []
-    const hashApp = this.applications.find(item => item.type === TX_INTEGRITY_TYPE)
+    const hashApp = this.applications.find(item => item.type === TX_INTEGRITY)
     if (hashApp) {
       const certificates = await BigchainDB.listTransactions(this.caelum.conn, hashApp.subject.integrity)
       for (let i = 0; i < certificates.length; i++) {
         if (certificates[i].operation === 'TRANSFER' &&
-          certificates[i].metadata.type === TX_INTEGRITY_TYPE) {
+          certificates[i].metadata.type === TX_HASH) {
           hashList.push({
             hashId: certificates[i].id,
             subject: certificates[i].metadata

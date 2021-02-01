@@ -48,7 +48,7 @@ module.exports = class Caelum {
         .then(async txInfo => {
           if (!txInfo) reject(new Error('Invalid txId ' + createTxId))
           else if (did !== txInfo.asset.data.did) reject(new Error('Transaction Id does not correspond to the DID'))
-          else if (txInfo.asset.data.type !== 2) reject(new Error('This is not an organization'))
+          else if (txInfo.asset.data.type !== 1) reject(new Error('This is not an organization'))
           else {
             org = new Organization(this, createTxId, did)
             await org.loadInformation()
@@ -75,7 +75,7 @@ module.exports = class Caelum {
       // 1. Get transaction for the certificate
       BigchainDB.getTransaction(this.conn, certificateId)
         .then(txInfo => {
-          if (txInfo.metadata.type !== 5) reject(new Error('not a certificate'))
+          if (txInfo.metadata.type !== 11) reject(new Error('not a certificate'))
           else {
             cert.subject = txInfo.metadata.subject
             cert.datetime = txInfo.metadata.datetime

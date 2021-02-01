@@ -8,10 +8,9 @@ module.exports = class Achievement {
    *
    * @param {string} subject of the achievement
    */
-  constructor (subject = false, did = false) {
+  constructor (subject = false) {
     this.subject = (subject !== false) ? subject : {}
     this.subject['@type'] = 'Achievement'
-    if (did) this.subject.issuer = 'did:caelum:' + did
   }
 
   /**
