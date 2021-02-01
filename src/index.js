@@ -88,7 +88,7 @@ module.exports = class Caelum {
         .then(results => {
           // 3. Filter the App
           for (let i = 0; i < results.length; i++) {
-            const certificates = results[i].metadata?.subject?.certificates || false
+            const certificates = results[i].metadata.subject.certificates || false
             if (certificates === cert.txIds.nodeAppDocs) {
               cert.txIds.appId = results[i].id
               return BigchainDB.getTransaction(this.conn, cert.txIds.appId)
@@ -101,7 +101,7 @@ module.exports = class Caelum {
         })
         .then(results => {
           for (let i = 0; i < results.length; i++) {
-            const applications = results[i].data?.applications || false
+            const applications = results[i].data.applications || false
             if (applications === cert.txIds.didAppsId) {
               cert.did = results[i].data.did
               cert.createTxId = results[i].id
