@@ -359,7 +359,7 @@ module.exports = class Organization {
     }
     const certsTxId = certApp.subject.certificates
     const lastAppTx = await BigchainDB.getLastTransaction(this.caelum.conn, certsTxId)
-    await BigchainDB.transferAsset(this.caelum.conn, lastAppTx, this.keys, TX_CERTLIST_TYPE, achievement.subject, this.keys.publicKey)
+    return await BigchainDB.transferAsset(this.caelum.conn, lastAppTx, this.keys, TX_CERTLIST_TYPE, achievement.subject, this.keys.publicKey)
   }
 
   /**
