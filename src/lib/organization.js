@@ -69,7 +69,7 @@ module.exports = class Organization {
   /**
    * saveOrganization. Save to BigchainDB the organization Object
    */
-  saveOrganization (legalName, taxID) {
+  saveOrganization (legalName, taxID, countryCode, network) {
     return new Promise((resolve) => {
       const data = {
         did: this.keys.publicKey,
@@ -77,10 +77,10 @@ module.exports = class Organization {
         diddocument: this.nodes.diddocument,
         verified: this.nodes.verified,
         applications: this.nodes.applications,
-        subject: {
-          legalName: legalName,
-          taxID: taxID
-        }
+        legalName,
+        taxID,
+        countryCode,
+        network
       }
       BigchainDB.createApp(this.caelum.conn, this.keys, data)
         .then(txId => {
@@ -96,12 +96,21 @@ module.exports = class Organization {
    */
   loadInformation () {
     return new Promise((resolve) => {
-      BigchainDB.getLastTransaction(this.caelum.conn, this.createTxId)
+      let asset
+      BigchainDB.getTransaction(this.caelum.conn, this.createTxId)
         .then(tx => {
-          if (tx.operation === 'CREATE') {
-            this.setSubject(tx.asset.subject)
-          } else if (tx.metadata.subject && tx.metadata.type === TX_INFO_TYPE) {
-            this.setSubject(tx.metadata.subject)
+          asset = tx.asset.data
+          this.setSubject({
+            legalName: asset.legalName,
+            taxID: asset.taxID,
+            countryCode: asset.countryCode,
+            network: asset.network
+          })
+          return BigchainDB.getLastTransaction(this.caelum.conn, this.createTxId)
+        })
+        .then(tx => {
+          if (tx.operation === 'TRANSFER') {
+            this.setInformation(tx.metadata.subject)
           }
           resolve()
         })
@@ -111,15 +120,14 @@ module.exports = class Organization {
   /**
    * Save Information : Verifiable Credential
    */
-  saveInformation (pub = false) {
+  saveInformation (subject, pub = false) {
     return new Promise((resolve) => {
       BigchainDB.getLastTransaction(this.caelum.conn, this.createTxId)
         .then(lastTx => {
           // TODO: Check is a valid public Key
           const publicKey = ((pub === false) ? this.keys.publicKey : pub)
-          const cloneSubject = { ...this.subject }
-          cloneSubject.location = JSON.stringify(cloneSubject.location)
-          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INFO_TYPE, cloneSubject, publicKey)
+          if (subject.location) subject.location = JSON.stringify(subject.location)
+          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INFO_TYPE, subject, publicKey)
         })
         .then((tx) => {
           resolve(tx)
@@ -237,7 +245,7 @@ module.exports = class Organization {
   }
 
   /**
-   *Sets the Subject of the Organization
+   * Sets the Subject of the Organization
    * subject will expect three fields
    *   - legalName : string
    *   - taxID : Valid taxId for the country (if network!= tabit)
@@ -265,6 +273,21 @@ module.exports = class Organization {
           network: subject.network
         }
         if (subject.location) this.subject.location = JSON.parse(subject.location)
+        resolve()
+      }
+    })
+  }
+
+  /**
+   * Sets the Information of the Organization
+  */
+  setInformation (subject) {
+    return new Promise((resolve, reject) => {
+      if (typeof subject !== 'object') {
+        reject(new Error('Invalid subject'))
+      } else {
+        this.subject.information = subject
+        if (subject.location) this.subject.information.location = JSON.parse(subject.location)
         resolve()
       }
     })

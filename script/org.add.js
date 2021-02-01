@@ -9,8 +9,7 @@ const transfer = async (org) => {
   console.log('Idspace : ' + newWallet.publicKey)
 
   // Save information. Add Info.
-  await org.setSubject({ legalName: 'Caelum Corp', network: 'tabit', countryCode: 'ES', taxID: 'B67474304'})
-  await org.saveInformation(newWallet.publicKey)
+  await org.saveInformation({ name: 'Caelum Labs'}, newWallet.publicKey)
 
   // New Diddocument
   const doc = caelum.newDidDoc(org.did)
@@ -33,16 +32,16 @@ const addCaelum = async () => {
   await org.addApplication('diddocument')
   await org.addApplication('applications')
   await org.addApplication('verified')
-  const did = await org.saveOrganization('Caelum Innovation SL', 'B67101519')
+  const did = await org.saveOrganization('Caelum Innovation SL', 'B67101519', 'ES', 'tabit')
 
-  const newWallet = await transfer(org)
+  // const newWallet = await transfer(org)
   // await this.context.info.org.setKeys(this.context.info.wallet.mnemonic)
 
   log('\n' + chalk.grey('Empresa : ') + chalk.cyan('Caelum Labs'))
   log(chalk.grey(' - DID  : ') + chalk.magenta(did))
   log(chalk.grey(' - TxID : ') + chalk.magenta(org.createTxId))
   log(chalk.grey(' - Genesis : ') + chalk.magenta(org.keys.mnemonic))
-  log(chalk.grey(' - Idspace : ') + chalk.magenta(newWallet.mnemonic))
+  // log(chalk.grey(' - Idspace : ') + chalk.magenta(newWallet.mnemonic))
 }
 
 const main = async () => {

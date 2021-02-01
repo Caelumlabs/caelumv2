@@ -39,10 +39,11 @@ module.exports = class BigchainDB {
    * @param {object} subject passphrase to be used to calculate DID (string or JSON)
    * @returns {string} DID
    */
-  static async createApp (conn, keypair, assetdata) {
+  static async createApp (conn, keypair, assetdata, subject = {}) {
     return new Promise((resolve) => {
       const metadata = {
-        datetime: new Date().toString()
+        datetime: new Date().toString(),
+        subject
       }
       const tx = driver.Transaction.makeCreateTransaction(
         assetdata, metadata,
