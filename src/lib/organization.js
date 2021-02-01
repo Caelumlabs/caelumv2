@@ -160,6 +160,7 @@ module.exports = class Organization {
       BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.diddocument)
         .then(tx => {
           this.lastDidDocument = (tx.metadata.type === TX_DIDDOC_TYPE) ? tx.metadata.subject : {}
+          this.lastDidDocument.service = JSON.parse(this.lastDidDocument.service)
           resolve()
         })
     })
