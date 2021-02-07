@@ -23,7 +23,7 @@ const idspace = async (password, did, seed) => {
   utils.logSpinner('Storage', 'Add Diddocument List', 1, 5)
   await pool.addApplication('diddocument')
   utils.logSpinner('Storage', 'Save Diddocument', 2, 5)
-  await pool.saveDidDocument()
+  await pool.saveDidDocument('http://localhost:2000/')
   utils.logSpinner('Storage', 'Add Verified List', 3, 5)
   await pool.addApplication('verified')
   utils.logSpinner('Applications', 'Add Application List', 4, 5)

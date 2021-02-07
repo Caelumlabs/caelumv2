@@ -171,18 +171,22 @@ module.exports = class Organization {
   * Save Information : Verifiable Credential
   * @param {object} subject VC credential
   */
-  saveDidDocument (pub = false) {
+  saveDidDocument (endpoint, pub = false) {
     return new Promise((resolve) => {
       const didDoc = JSON.stringify({
         '@context': ['https://w3c-ccg.github.io/did-spec/contexts/did-v0.11.jsonld'],
         id: 'did:caelum:' + this.did,
-        assertionMethod: [
-          {
-            '@id': 'did:caelum:' + this.did + '#key-1',
-            type: 'Ed25519VerificationKey2018',
-            controller: 'did:caelum:' + this.did,
-            publicKeyBase58: this.keys.w3c.publicKeyBase58
-          }]
+        assertionMethod: [{
+          '@id': 'did:caelum:' + this.did + '#key-1',
+          type: 'Ed25519VerificationKey2018',
+          controller: 'did:caelum:' + this.did,
+          publicKeyBase58: this.keys.w3c.publicKeyBase58
+        }],
+        service: [{
+          '@id': 'did:caelum:' + this.did + '#caelum',
+          type: 'Idspace',
+          serviceEndpoint: endpoint
+        }]
       })
       Storage.getLastTransaction(this.caelum.storage, this.nodes.diddocument)
         .then(lastTx => {

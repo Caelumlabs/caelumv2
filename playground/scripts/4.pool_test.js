@@ -18,11 +18,13 @@ const setup = async (password) => {
   const pool = await caelum.importOrganization(poolInfo, password)
   await pool.loadInformation()
   await pool.loadApplications()
+  console.log(pool)
 
   const peerDid = 'holder'
   const adminVC = await pool.addMember(peerDid, 'admin')
   const valid = await pool.verifyMember(adminVC, 'admin')
 
+  console.log(valid)
 }
 
 /**
