@@ -22,7 +22,7 @@ const setup = async (password) => {
   const peerDid = 'holder'
   const adminVC = await pool.addMember(peerDid, 'admin')
   const valid = await pool.verifyMember(adminVC, 'admin')
-  console.log(valid)
+
 }
 
 /**

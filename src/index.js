@@ -6,7 +6,8 @@ const Application = require('./lib/application')
 const BigchainDB = require('./utils/bigchaindb')
 const Blockchain = require('./utils/substrate')
 const driver = require('bigchaindb-driver')
-// const axios = require('axios')
+const Crypto = require('./utils/crypto')
+
 /**
  * Caelum main lin
  */
@@ -149,5 +150,10 @@ module.exports = class Caelum {
           resolve(results)
         })
     })
+  }
+
+  async loadCrypto () {
+    await Crypto.init()
+    return Crypto
   }
 }
