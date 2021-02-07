@@ -1,11 +1,13 @@
 'use strict'
-const v = require('validator')
 const countries = require('../utils/countries')
-const BigchainDB = require('../utils/bigchaindb')
+const Storage = require('../utils/bigchaindb')
+const Blockchain = require('../utils/substrate')
+const W3C = require('../utils/w3c')
+const Crypto = require('../utils/crypto')
 const Application = require('./application')
 const Achievement = require('./achievement')
 const Location = require('./location')
-
+// const CBOR = require('cbor-js')
 const TX_DID = 1
 const TX_INFO = 2
 const TX_DIDDOC_LIST = 3
@@ -30,11 +32,11 @@ module.exports = class Organization {
   /**
    * Constructor. It creates an Organization object.
    */
-  constructor (caelum, createTxId = false, did = false) {
-    this.nodes = {}
+  constructor (caelum, did = false) {
     this.did = did
-    this.createTxId = createTxId
+    this.createTxId = false
     this.caelum = caelum
+    this.nodes = {}
     this.applications = []
     this.certificates = []
   }
@@ -62,35 +64,32 @@ module.exports = class Organization {
       const app = new Application()
       app.setSubject(subject.name, subject.type)
         .then(() => {
-          return BigchainDB.createApp(this.caelum.conn, this.keys, { name: subject.name, type: subject.type })
+          return Storage.createApp(this.caelum.storage, this.keys.storage, subject)
         })
         .then(txId => {
           app.createTxId = txId
           this.nodes[apptype] = txId
+          this.applications.push({ createTxId: txId, subject })
           resolve(app)
         })
     })
   }
 
   /**
-   * saveOrganization. Save to BigchainDB the organization Object
+   * saveOrganization. Save to Storage the organization Object
    */
-  saveOrganization (legalName, taxID, countryCode, network) {
+  saveOrganization (signedVC) {
     return new Promise((resolve) => {
       const data = {
-        did: this.keys.publicKey,
+        did: this.did,
         type: TX_DID,
         diddocument: this.nodes.diddocument,
         verified: this.nodes.verified,
         applications: this.nodes.applications,
-        legalName,
-        taxID,
-        countryCode,
-        network
+        credential: signedVC
       }
-      BigchainDB.createApp(this.caelum.conn, this.keys, data)
+      Storage.createApp(this.caelum.storage, this.keys.storage, data)
         .then(txId => {
-          this.did = this.keys.publicKey
           this.createTxId = txId
           resolve(this.did)
         })
@@ -100,25 +99,99 @@ module.exports = class Organization {
   /**
    * Save Information : Verifiable Credential
    */
-  loadInformation () {
+  async loadInformation () {
+    await this.caelum.governance.connect()
     return new Promise((resolve) => {
-      let asset
-      BigchainDB.getTransaction(this.caelum.conn, this.createTxId)
+      this.caelum.governance.getDidDocHash(this.did)
+        .then(createTxId => {
+          this.createTxId = createTxId
+          return this.caelum.governance.getDidData(this.did)
+        })
+        .then(didDataJson => {
+          this.level = didDataJson.level
+          return Storage.getTransaction(this.caelum.storage, this.createTxId)
+        })
         .then(tx => {
-          asset = tx.asset.data
-          this.setSubject({
-            legalName: asset.legalName,
-            taxID: asset.taxID,
-            countryCode: asset.countryCode,
-            network: asset.network
-          })
-          return BigchainDB.getLastTransaction(this.caelum.conn, this.createTxId)
+          this.nodes = {
+            diddocument: tx.asset.data.diddocument || false,
+            verified: tx.asset.data.verified || false,
+            applications: tx.asset.data.applications || false
+          }
+          this.subject = tx.asset.data.credential
+          return Storage.getLastTransaction(this.caelum.storage, this.createTxId)
         })
         .then(tx => {
           if (tx.operation === 'TRANSFER') {
             this.setInformation(tx.metadata.subject)
           }
+          return this.loadDidDocument()
+        })
+        .then(() => {
           resolve()
+        })
+        .catch(e => {
+          console.log(e)
+          resolve(false)
+        })
+    })
+  }
+
+  /**
+   * Save Information : Verifiable Credential
+   */
+  loadDidDocument () {
+    return new Promise((resolve) => {
+      Storage.getLastTransaction(this.caelum.storage, this.nodes.diddocument)
+        .then(tx => {
+          if (tx.operation === 'TRANSFER') {
+            this.didDocument = (tx.metadata.type === TX_DIDDOC) ? JSON.parse(tx.metadata.subject) : {}
+            if (this.didDocument.assertionMethod) {
+              if (!this.keys) {
+                this.keys = { w3c: false, governanace: false, storage: false }
+                this.keys.w3c = {
+                  passphrase: null,
+                  privateKeyBase58: null,
+                  publicKeyBase58: this.didDocument.assertionMethod[0].publicKeyBase58,
+                  id: 'did:caelum:' + this.did + '#key-1',
+                  type: 'Ed25519VerificationKey2018',
+                  controller: 'did:caelum:' + this.did
+                }
+              }
+            }
+            // parse keys
+            // parse service
+            // this.didDocument.service = JSON.parse(this.didDocument.service)
+          } else this.didDocument = false
+          resolve()
+        })
+    })
+  }
+
+  /**
+  * Save Information : Verifiable Credential
+  * @param {object} subject VC credential
+  */
+  saveDidDocument (pub = false) {
+    return new Promise((resolve) => {
+      const didDoc = JSON.stringify({
+        '@context': ['https://w3c-ccg.github.io/did-spec/contexts/did-v0.11.jsonld'],
+        id: 'did:caelum:' + this.did,
+        assertionMethod: [
+          {
+            '@id': 'did:caelum:' + this.did + '#key-1',
+            type: 'Ed25519VerificationKey2018',
+            controller: 'did:caelum:' + this.did,
+            publicKeyBase58: this.keys.w3c.publicKeyBase58
+          }]
+      })
+      Storage.getLastTransaction(this.caelum.storage, this.nodes.diddocument)
+        .then(lastTx => {
+          // TODO: Check is a valid public Key
+          const publicKey = ((pub === false) ? this.keys.storage.publicKey : pub)
+          return Storage.transferAsset(this.caelum.storage, lastTx, this.keys.storage, TX_DIDDOC, didDoc, publicKey)
+        })
+        .then((tx) => {
+          resolve(tx)
         })
     })
   }
@@ -128,12 +201,12 @@ module.exports = class Organization {
    */
   saveInformation (subject, pub = false) {
     return new Promise((resolve) => {
-      BigchainDB.getLastTransaction(this.caelum.conn, this.createTxId)
+      Storage.getLastTransaction(this.caelum.storage, this.createTxId)
         .then(lastTx => {
           // TODO: Check is a valid public Key
           const publicKey = ((pub === false) ? this.keys.publicKey : pub)
           if (subject.location) subject.location = JSON.stringify(subject.location)
-          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INFO, subject, publicKey)
+          return Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_INFO, subject, publicKey)
         })
         .then((tx) => {
           resolve(tx)
@@ -174,51 +247,15 @@ module.exports = class Organization {
 
   /**
    * Save Information : Verifiable Credential
-   * @param {string} diddocumentTxId VC credential
-   */
-  loadDidDocument (diddocumentTxId) {
-    this.nodes.diddocument = diddocumentTxId
-    return new Promise((resolve) => {
-      BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.diddocument)
-        .then(tx => {
-          if (tx.operation === 'TRANSFER') {
-            this.lastDidDocument = (tx.metadata.type === TX_DIDDOC) ? tx.metadata.subject : {}
-            this.lastDidDocument.service = JSON.parse(this.lastDidDocument.service)
-          } else this.lastDidDocument = {}
-          resolve()
-        })
-    })
-  }
-
-  /**
-   * Save Information : Verifiable Credential
-   * @param {object} subject VC credential
-   */
-  saveDidDocument (subject, pub = false) {
-    return new Promise((resolve) => {
-      BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.diddocument)
-        .then(lastTx => {
-          // TODO: Check is a valid public Key
-          const publicKey = ((pub === false) ? this.keys.publicKey : pub)
-          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_DIDDOC, subject, publicKey)
-        })
-        .then((tx) => {
-          resolve(tx)
-        })
-    })
-  }
-
-  /**
-   * Save Information : Verifiable Credential
    * @param {object} subject VC credential
    */
   saveVerified (did, pub = false) {
     return new Promise((resolve) => {
-      BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.verified)
+      Storage.getLastTransaction(this.caelum.storage, this.nodes.verified)
         .then(lastTx => {
           // TODO: Check is a valid public Key
           const publicKey = ((pub === false) ? this.keys.publicKey : pub)
-          return BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_VERIFIED, { did }, publicKey)
+          return Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_VERIFIED, { did }, publicKey)
         })
         .then((tx) => {
           resolve(tx)
@@ -230,10 +267,9 @@ module.exports = class Organization {
    * Save Information : Verifiable Credential
    * @param {string} diddocumentTxId VC credential
    */
-  loadApplications (applicationsTxId) {
-    this.nodes.applications = applicationsTxId
+  loadApplications () {
     return new Promise((resolve) => {
-      BigchainDB.listTransactions(this.caelum.conn, applicationsTxId)
+      Storage.listTransactions(this.caelum.storage, this.nodes.applications)
         .then(tx => {
           for (let i = 0; i < tx.length; i++) {
             if (tx[i].operation === 'TRANSFER') {
@@ -265,10 +301,10 @@ module.exports = class Organization {
         reject(new Error('Invalid legalName'))
       } else if (typeof subject.network !== 'string' || subject.network.length === 0) {
         reject(new Error('Invalid Network'))
-      } else if (typeof subject.countryCode !== 'string' || !v.isISO31661Alpha2(subject.countryCode)) {
-        reject(new Error('Invalid countryCode'))
-      } else if (typeof countries[subject.countryCode] !== 'object') {
-        reject(new Error('Unknown countryCode'))
+      // } else if (typeof subject.countryCode !== 'string' || !v.isISO31661Alpha2(subject.countryCode)) {
+      //   reject(new Error('Invalid countryCode'))
+      // } else if (typeof countries[subject.countryCode] !== 'object') {
+      //  reject(new Error('Unknown countryCode'))
       } else if (subject.network !== 'tabit' && (subject.taxID.length === 0 || countries[subject.countryCode].isTaxID(subject.taxID) === false)) {
         reject(new Error('Invalid taxID'))
       } else {
@@ -307,7 +343,7 @@ module.exports = class Organization {
     const certApp = this.applications.find(item => item.type === TX_TAGS)
     if (!certApp) return (false)
     else {
-      const certificates = await BigchainDB.listTransactions(this.caelum.conn, certApp.subject.certificates)
+      const certificates = await Storage.listTransactions(this.caelum.storage, certApp.subject.certificates)
       for (let i = 0; i < certificates.length; i++) {
         if (certificates[i].operation === 'TRANSFER' &&
           certificates[i].metadata.type === TX_TAG_TYPE &&
@@ -330,7 +366,7 @@ module.exports = class Organization {
     return new Promise((resolve, reject) => {
       const certificates = []
       const loadedCertificates = []
-      BigchainDB.searchMetadata(this.caelum.conn, this.did)
+      Storage.searchMetadata(this.caelum.storage, this.did)
         .then(async results => {
           for (let i = 0; i < results.length; i++) {
             const metadata = results[i].metadata
@@ -364,7 +400,7 @@ module.exports = class Organization {
    * @param {string} issuedId certtificate ID
    */
   async getIssuedCertificate (issuedId) {
-    const issued = await BigchainDB.getTransaction(this.caelum.conn, issuedId)
+    const issued = await Storage.getTransaction(this.caelum.storage, issuedId)
     return issued
   }
 
@@ -373,14 +409,14 @@ module.exports = class Organization {
    */
   async addCertificateApp (pub = false) {
     // Create twho nodes for the App certificates : certifivates (VC) and issued (DIDs)
-    const issuedTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Issued', type: TX_APP })
-    const acceptedTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Accepted', type: TX_APP })
-    const certsTxId = await BigchainDB.createApp(this.caelum.conn, this.keys, { name: 'Certificates', type: TX_APP })
+    const issuedTxId = await Storage.createApp(this.caelum.storage, this.keys.storage, { name: 'Issued', type: TX_APP })
+    const acceptedTxId = await Storage.createApp(this.caelum.storage, this.keys.storage, { name: 'Accepted', type: TX_APP })
+    const certsTxId = await Storage.createApp(this.caelum.storage, this.keys.storage, { name: 'Certificates', type: TX_APP })
     // Add a new application to the app list
-    const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.applications)
+    const lastTx = await Storage.getLastTransaction(this.caelum.storage, this.nodes.applications)
     const metadata = { name: 'Certificates', certificates: certsTxId, issued: issuedTxId, accepted: acceptedTxId }
-    const publicKey = ((pub === false) ? this.keys.publicKey : pub)
-    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_TAGS, metadata, publicKey)
+    const publicKey = ((pub === false) ? this.keys.storage.publicKey : pub)
+    const txId = await Storage.transferAsset(this.caelum.storage, lastTx, this.keys.storage, TX_TAGS, metadata, publicKey)
     const app = { createTxId: txId, type: TX_TAGS, subject: metadata }
     this.applications.push(app)
     return app
@@ -391,14 +427,27 @@ module.exports = class Organization {
    * @param {object} subject Subject of the certificate
    */
   async addCertificate (subject) {
-    const achievement = new Achievement(subject)
-    let certApp = this.certificates.find(item => item.type === TX_TAGS)
-    if (!certApp) {
-      certApp = await this.addCertificateApp()
-    }
-    const certsTxId = certApp.subject.certificates
-    const lastAppTx = await BigchainDB.getLastTransaction(this.caelum.conn, certsTxId)
-    return await BigchainDB.transferAsset(this.caelum.conn, lastAppTx, this.keys, TX_TAG_TYPE, achievement.subject, this.keys.publicKey)
+    return new Promise((resolve, reject) => {
+      const achievement = new Achievement(subject)
+      let certApp = this.certificates.find(item => item.type === TX_TAGS)
+      const promise = (certApp) ? Promise.resolve(certApp) : this.addCertificateApp()
+      promise
+        .then((result) => {
+          certApp = result
+          console.log(certApp)
+          const certsTxId = certApp.subject.certificates
+          return Storage.getLastTransaction(this.caelum.storage, certsTxId)
+        })
+        .then((result) => {
+          const lastAppTx = result
+          console.log(lastAppTx)
+          return Storage.transferAsset(this.caelum.storage, lastAppTx, this.keys.storage, TX_TAG_TYPE, achievement.subject, this.keys.storage.publicKey)
+        })
+        .then((result) => {
+          resolve(result)
+        })
+        .catch((e) => console.log(e))
+    })
   }
 
   /**
@@ -412,9 +461,9 @@ module.exports = class Organization {
     if (!certApp) throw (new Error('No Tags App found '))
     else if (!certInfo) throw (new Error('No certificate found with certificateId ' + certificateId))
     else {
-      const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, certApp.subject.issued)
+      const lastTx = await Storage.getLastTransaction(this.caelum.storage, certApp.subject.issued)
       const status = (issued ? 'issued' : 'revoked')
-      return await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
+      return await Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
     }
   }
 
@@ -429,9 +478,9 @@ module.exports = class Organization {
       await this.addCertificateApp()
       certApp = this.applications[0]
     }
-    const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, certApp.subject.accepted)
+    const lastTx = await Storage.getLastTransaction(this.caelum.storage, certApp.subject.accepted)
     const status = (accepted ? 'accepted' : 'not_accepted')
-    await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
+    await Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
   }
 
   /**
@@ -445,7 +494,7 @@ module.exports = class Organization {
     if (!certApp) return certificatesIssued
     else {
       const statusList = (issuedCerts ? certApp.subject.issued : certApp.subject.accepted)
-      const issued = await BigchainDB.listTransactions(this.caelum.conn, statusList)
+      const issued = await Storage.listTransactions(this.caelum.storage, statusList)
       for (let i = 0; i < issued.length; i++) {
         if (issued[i].operation === 'TRANSFER' &&
           issued[i].metadata.type === TX_ISSUED &&
@@ -468,12 +517,12 @@ module.exports = class Organization {
   async addHashingApp (pub = false, newKeys = false) {
     // Create twho nodes for the App certificates : certifivates (VC) and issued (DIDs)
     const keys = (newKeys === false) ? this.keys : newKeys
-    const integrityTxId = await BigchainDB.createApp(this.caelum.conn, keys, { name: 'Integrity', type: TX_APP })
+    const integrityTxId = await Storage.createApp(this.caelum.storage, keys, { name: 'Integrity', type: TX_APP })
     // Add a new application to the app list
-    const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, this.nodes.applications)
+    const lastTx = await Storage.getLastTransaction(this.caelum.storage, this.nodes.applications)
     const metadata = { name: 'Integrity', integrity: integrityTxId }
     const publicKey = ((pub === false) ? this.keys.publicKey : pub)
-    const txId = await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_INTEGRITY, metadata, publicKey)
+    const txId = await Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_INTEGRITY, metadata, publicKey)
     const app = { createTxId: txId, type: TX_INTEGRITY, subject: metadata }
     this.applications.push(app)
     return app
@@ -488,8 +537,8 @@ module.exports = class Organization {
       hashApp = await this.addHashingApp()
     }
     // TODO:Hash metadata and return txId
-    const lastTx = await BigchainDB.getLastTransaction(this.caelum.conn, hashApp.subject.integrity)
-    await BigchainDB.transferAsset(this.caelum.conn, lastTx, this.keys, TX_HASH, metadata, this.keys.publicKey)
+    const lastTx = await Storage.getLastTransaction(this.caelum.storage, hashApp.subject.integrity)
+    await Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_HASH, metadata, this.keys.publicKey)
   }
 
   /**
@@ -499,7 +548,7 @@ module.exports = class Organization {
     const hashList = []
     const hashApp = this.applications.find(item => item.type === TX_INTEGRITY)
     if (hashApp) {
-      const certificates = await BigchainDB.listTransactions(this.caelum.conn, hashApp.subject.integrity)
+      const certificates = await Storage.listTransactions(this.caelum.storage, hashApp.subject.integrity)
       for (let i = 0; i < certificates.length; i++) {
         if (certificates[i].operation === 'TRANSFER' &&
           certificates[i].metadata.type === TX_HASH) {
@@ -514,20 +563,100 @@ module.exports = class Organization {
   }
 
   /**
+   * Set new keys
+   */
+  async newKeys () {
+    this.keys = {}
+    this.keys.governance = await Blockchain.newKeys()
+    if (this.did === false) {
+      this.did = this.keys.governance.address
+    }
+    this.keys.storage = await Storage.getKeys(false)
+    this.keys.w3c = await W3C.newKeys(this.did)
+  }
+
+  /**
    * Set the keys for this organization
    *
    * @param {string} mnemonic Seed. If false will create a new pair of keys.
    */
-  setKeys (mnemonic = false) {
-    return new Promise((resolve, reject) => {
-      BigchainDB.getKeys(mnemonic)
-        .then(result => {
-          this.keys = result
-          resolve(this.keys)
-        })
-        .catch((e) => {
-          reject(e)
-        })
-    })
+  async setKeys (keyType, keyInfo) {
+    if (!this.keys) this.keys = {}
+    switch (keyType) {
+      case 'storage':
+        this.keys.storage = await Storage.getKeys(keyInfo)
+        break
+      case 'governance':
+        this.keys.governance = await Blockchain.getKeys(keyInfo)
+        break
+      case 'w3c':
+        this.keys.w3c = await W3C.getKeys(keyInfo)
+        break
+    }
+  }
+
+  async generateDid (subject) {
+    const key = await Blockchain.newKeys()
+    const didSubject = { ...subject }
+    didSubject.id = key.address
+    const result = await W3C.signCredential(didSubject, this.did, this.keys.w3c, this.didDocument)
+    return result
+  }
+
+  async signDid (subject) {
+    const result = await W3C.signCredential(subject, this.did, this.keys.w3c)
+    return result
+  }
+
+  async addMember (peerDid, capacity) {
+    const result = await W3C.signMember(this.did, peerDid, capacity, this.keys.w3c, this.didDocument)
+    return result
+  }
+
+  async verifyMember (signedVC, capacity) {
+    let result = await W3C.verifyCredential(signedVC, this.did, this.keys.w3c, this.didDocument)
+    if (result.verified === true) {
+      result = (signedVC.credentialSubject.capacity === capacity)
+    }
+    return result
+  }
+
+  async verifyVC (signedVC) {
+    const result = await W3C.verifyCredential(signedVC, this.did, this.keys.w3c, this.didDocument)
+    return result
+  }
+
+  async registerDid (did, createTxId, address, level, tokens) {
+    await this.caelum.governance.connect()
+    this.caelum.governance.setKeyring('what unlock stairs benefit salad agent rent ask diamond horror fox aware')
+
+    // Register the DID & CreateTxId-
+    console.log('Register DID')
+    await this.caelum.governance.registerDid(did, address, level)
+    console.log('Register 1')
+    await this.caelum.governance.wait4Event('DidRegistered')
+    console.log('Register 2')
+    await this.caelum.governance.registerDidDocument(did, createTxId)
+    console.log('Register 3')
+
+    // Transfer tokens.
+    const amountTransfer = Blockchain.units * tokens
+    await this.caelum.governance.transferTokensNoFees(address, amountTransfer)
+
+    // assign new owner.
+    console.log('Register 4')
+    // await this.caelum.governance.changeOwner(did, address)
+    console.log('Register 5')
+  }
+
+  async export (password) {
+    const keys = Crypto.encryptObj(password, this.keys)
+    const json = JSON.stringify({ did: this.did, keys: keys })
+    return json
+  }
+
+  async import (data, password) {
+    this.did = data.did
+    this.keys = Crypto.decryptObj(password, data.keys)
   }
 }

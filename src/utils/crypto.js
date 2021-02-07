@@ -175,13 +175,13 @@ module.exports = class Crypto {
    * @param {string} obj Message to be encrypted
    * @returns {Promise} Return a promise with the execution of the encryption.
    */
-  static encryptObj (password, obj) {
+  static encryptObj (password, obj, stringify = true) {
     // Prepare Message.
     const result = this.encrypt(password, JSON.stringify(obj))
-    return (JSON.stringify({
+    return ({
       e: u8aToHex(result.encrypted),
       n: u8aToHex(result.nonce)
-    }))
+    })
   }
 
   /**
@@ -193,10 +193,9 @@ module.exports = class Crypto {
    */
   static decryptObj (password, msgEncrypted) {
     // Decrypt
-    const preEncrypted = JSON.parse(msgEncrypted)
     const decryptMsg = {
-      encrypted: hexToU8a(preEncrypted.e),
-      nonce: hexToU8a(preEncrypted.n)
+      encrypted: hexToU8a(msgEncrypted.e),
+      nonce: hexToU8a(msgEncrypted.n)
     }
     const messageDecrypted = this.decrypt(password, decryptMsg)
     return (JSON.parse(messageDecrypted))
