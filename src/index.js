@@ -152,8 +152,7 @@ module.exports = class Caelum {
     })
   }
 
-  async loadCrypto () {
-    await Crypto.init()
+  static loadCrypto () {
     return Crypto
   }
 }

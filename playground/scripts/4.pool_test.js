@@ -4,6 +4,7 @@ const utils = require('../utils/index')
 // Caelum Lib.
 const Caelum = require('../../src/index')
 const Blockchain = require('../../src/utils/substrate')
+const Crypto = Caelum.loadCrypto()
 
 // Constants
 const GOVERNANCE = 'wss://substrate.tabit.caelumapp.com'
@@ -25,6 +26,7 @@ const setup = async (password) => {
   const valid = await pool.verifyMember(adminVC, 'admin')
 
   console.log(valid)
+  console.log(Crypto.random())
 }
 
 /**
