@@ -145,6 +145,7 @@ module.exports = class Organization {
         .then(tx => {
           if (tx.operation === 'TRANSFER') {
             this.didDocument = (tx.metadata.type === TX_DIDDOC) ? JSON.parse(tx.metadata.subject) : {}
+            this.endpoint = this.didDocument.service[0].serviceEndpoint
             if (this.didDocument.assertionMethod) {
               if (!this.keys) {
                 this.keys = { w3c: false, governanace: false, storage: false }
@@ -613,7 +614,8 @@ module.exports = class Organization {
   }
 
   async addMember (peerDid, capacity) {
-    const result = await W3C.signMember(this.did, peerDid, capacity, this.keys.w3c, this.didDocument)
+    const sphere = (capacity === 'Over18') ? 'personal' : 'professional'
+    const result = await W3C.signMember(this.did, peerDid, capacity, sphere, this.keys.w3c, this.didDocument)
     return result
   }
 
@@ -635,13 +637,9 @@ module.exports = class Organization {
     this.caelum.governance.setKeyring('what unlock stairs benefit salad agent rent ask diamond horror fox aware')
 
     // Register the DID & CreateTxId-
-    console.log('Register DID')
     await this.caelum.governance.registerDid(did, address, level)
-    console.log('Register 1')
     await this.caelum.governance.wait4Event('DidRegistered')
-    console.log('Register 2')
     await this.caelum.governance.registerDidDocument(did, createTxId)
-    console.log('Register 3')
 
     // Transfer tokens.
     const amountTransfer = Blockchain.units * tokens

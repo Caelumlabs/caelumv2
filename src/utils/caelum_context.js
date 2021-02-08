@@ -38,7 +38,8 @@ module.exports = {
       taxID: 'ex:Tax ID',
       network: 'ex:Caelum Network',
       countryCode: 'ex:ES',
-      capacity: 'ex:admin'
+      capacity: 'ex:admin',
+      sphere: 'ex:personal'
     }
   ]
 }
