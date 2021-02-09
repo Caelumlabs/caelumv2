@@ -614,7 +614,7 @@ module.exports = class Organization {
   }
 
   async addMember (peerDid, capacity) {
-    const sphere = (capacity === 'Over18') ? 'personal' : 'professional'
+    const sphere = (capacity === 'over18') ? 'personal' : 'professional'
     const result = await W3C.signMember(this.did, peerDid, capacity, sphere, this.keys.w3c, this.didDocument)
     return result
   }
