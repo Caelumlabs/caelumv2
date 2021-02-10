@@ -39,7 +39,13 @@ module.exports = {
       network: 'ex:Caelum Network',
       countryCode: 'ex:ES',
       capacity: 'ex:admin',
-      sphere: 'ex:personal'
+      sphere: 'ex:personal',
+      peerDid: 'ex: did:peerdid:12345',
+      email: 'ex:john@smith.test',
+      currentGivenName: 'ex:John',
+      currentFamilyName: 'ex:Smith',
+      telephone: 'ex:5551211',
+      govId: 'ex:12345M'
     }
   ]
 }
