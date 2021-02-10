@@ -22,8 +22,17 @@ const setup = async (password) => {
 
   const peerDid = 'holder'
   const adminVC = await pool.addMember(peerDid, 'admin')
-  const valid = await pool.verifyMember(adminVC, 'admin')
-  console.log(valid)
+  let valid = await pool.verifyMember(adminVC, 'admin')
+
+  const oidcVC = await pool.addMember(peerDid, 'oidc', {
+    email: 'user.email',
+    currentGivenName: 'user.currentGivenName',
+    currentFamilyName: 'user.currentFamilyName',
+    telephone: 'user.telephone',
+    govId: 'user.govId',
+  })
+  valid = await pool.verifyMember(oidcVC, 'oidc')
+  console.log(oidcVC, valid)
 
   console.log(Crypto.random())
 }

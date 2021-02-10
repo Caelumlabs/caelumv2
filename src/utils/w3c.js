@@ -54,7 +54,7 @@ module.exports = class W3C {
     return signedVC
   }
 
-  static async signMember (issuer, holder, capacity, sphere, keys, didDocument) {
+  static async signMember (issuer, holder, subject, keys, didDocument) {
     const documentLoader = W3C.loadCustomContext(didDocument)
     const keyPair = await LDKeyPair.from(keys)
     const suite = new Ed25519Signature2018({
@@ -70,10 +70,7 @@ module.exports = class W3C {
       issuer: 'did:caelum:' + issuer,
       holder: holder,
       issuanceDate: new Date().toISOString(),
-      credentialSubject: {
-        capacity: capacity,
-        sphere: sphere
-      }
+      credentialSubject: subject
     }
     const signedVC = await vc.issue({ credential, suite, documentLoader })
     return signedVC
