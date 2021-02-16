@@ -5,8 +5,10 @@ const Blockchain = require('../utils/substrate')
 const W3C = require('../utils/w3c')
 const Crypto = require('../utils/crypto')
 const Application = require('./application')
+const Workflow = require('./workflow')
 const Achievement = require('./achievement')
 const Location = require('./location')
+
 // const CBOR = require('cbor-js')
 const TX_DID = 1
 const TX_INFO = 2
@@ -651,6 +653,11 @@ module.exports = class Organization {
     console.log('Register 4')
     // await this.caelum.governance.changeOwner(did, address)
     console.log('Register 5')
+  }
+
+  getWorkflow (workflowId, stateId = 0, partyId = 1, actionId = 1) {
+    const wf = new Workflow(this, workflowId, stateId, partyId, actionId)
+    return wf
   }
 
   async export (password) {
