@@ -8,6 +8,7 @@ const Application = require('./application')
 const Workflow = require('./workflow')
 const Achievement = require('./achievement')
 const Location = require('./location')
+const SDK = require('./sdk')
 const axios = require('axios')
 
 // const CBOR = require('cbor-js')
@@ -71,6 +72,15 @@ module.exports = class Organization {
           resolve(false)
         })
     })
+  }
+
+  /**
+   * open an SDK Instance.
+   */
+  openSdK (tokenApi) {
+    // Must be loggedIn
+    const sdk = new SDK(this.caelum, this.did, tokenApi, this.endpoint)
+    return sdk
   }
 
   /**
