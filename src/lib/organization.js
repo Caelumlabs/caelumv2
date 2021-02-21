@@ -8,6 +8,7 @@ const Application = require('./application')
 const Workflow = require('./workflow')
 const Achievement = require('./achievement')
 const Location = require('./location')
+const axios = require('axios')
 
 // const CBOR = require('cbor-js')
 const TX_DID = 1
@@ -41,6 +42,35 @@ module.exports = class Organization {
     this.nodes = {}
     this.applications = []
     this.certificates = []
+  }
+
+  /**
+   * Creates a new session.
+   */
+  getSession () {
+    return new Promise((resolve, reject) => {
+      axios.post(this.endpoint + 'auth/session')
+        .then((result) => {
+          // 1 - login/register to Tabit network (last param)
+          const connectionString = '1-' + result.data.sessionId + '-' + this.did + '-1'
+          resolve({ sessionId: result.data.sessionId, connectionString })
+        })
+        .catch((e) => {
+          resolve(false)
+        })
+    })
+  }
+
+  waitSession (sessionId) {
+    return new Promise((resolve, reject) => {
+      axios.get(this.endpoint + 'auth/session/wait/' + sessionId)
+        .then((result) => {
+          resolve(result.data)
+        })
+        .catch(() => {
+          resolve(false)
+        })
+    })
   }
 
   /**

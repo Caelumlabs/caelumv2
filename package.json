@@ -1,7 +1,7 @@
 {
   "name": "caelum",
-  "version": "1.1.7",
-  "description": "Caelum libraries for SSI",
+  "version": "1.2.0",
+  "description": "Caelum libraries",
   "main": "src/index.js",
   "repository": "https://github.com/Caelumlabs/caelum.git",
   "author": "Alex Puig <alex@caelumlabs.com>",

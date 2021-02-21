@@ -42,14 +42,14 @@ module.exports = {
     },
     saveFile: (name, exportJson) => {
       return new Promise((resolve, reject) => {
-        fs.writeFile('../certificates/' + name + '.json', exportJson, 'utf8', async () => {
+        fs.writeFile('./' + name + '.json', exportJson, 'utf8', async () => {
           resolve()
         })
       })
     },
     readFile: (name) => {
       return new Promise((resolve, reject) => {
-        fs.readFile('../certificates/' + name + '.json', 'utf8', async (err, data) => {
+        fs.readFile('./' + name + '.json', 'utf8', async (err, data) => {
           resolve(JSON.parse(data))
         })
       })

@@ -1,6 +1,7 @@
 'use strict'
 require('dotenv').config()
 const v = require('validator')
+const User = require('./lib/user')
 const Organization = require('./lib/organization')
 const Application = require('./lib/application')
 const BigchainDB = require('./utils/bigchaindb')
@@ -33,11 +34,27 @@ module.exports = class Caelum {
    *
    * @param {object} data Data can be a DID (string) or an object with {legalName and taxID}
    */
-  async newOrganization (did = false) {
+  async newOrganization (did = false, newKeys = false) {
     const organization = new Organization(this, did)
-    await organization.newKeys()
+    if (newKeys) await organization.newKeys()
     return organization
     // return organization.setSubject(subject)
+  }
+
+  /**
+   * newUser. creates a new User object
+   */
+  async newUser (importJson = false) {
+    let connections = {}; let credentials = {}; const orgs = {}
+    if (importJson !== false) {
+      connections = importJson.connections
+      credentials = importJson.credentials
+      for (const did in connections) {
+        orgs[did] = await this.loadOrganization(did)
+      }
+    }
+    const user = new User(this, connections, credentials, orgs)
+    return user
   }
 
   /**
