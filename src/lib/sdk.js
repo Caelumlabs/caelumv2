@@ -20,13 +20,18 @@ module.exports = class SDK {
    */
   getUsers () {
     return new Promise((resolve, reject) => {
-      console.log(this.endpoint + 'user', { headers: { Authorization: `Bearer ${this.tokenApi}` } })
       axios.get(this.endpoint + 'user', { headers: { Authorization: `Bearer ${this.tokenApi}` } })
-        .then((result) => resolve(result.data))
-        .catch(e => {
-          console.log(e.status)
-          resolve(false)
-        })
+        .then(res => resolve(res.data)).catch(e => resolve(false))
+    })
+  }
+
+  /**
+   * Get a list of users.
+   */
+  getParameters () {
+    return new Promise((resolve, reject) => {
+      axios.get(this.endpoint + 'parameter', { headers: { Authorization: `Bearer ${this.tokenApi}` } })
+        .then(res => resolve(res.data)).catch(e => resolve(false))
     })
   }
 }
