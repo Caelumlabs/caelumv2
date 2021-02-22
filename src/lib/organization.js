@@ -43,6 +43,8 @@ module.exports = class Organization {
     this.nodes = {}
     this.applications = []
     this.certificates = []
+    this.sdk = false
+    this.parameters = false
   }
 
   /**
@@ -65,7 +67,11 @@ module.exports = class Organization {
   waitSession (sessionId) {
     return new Promise((resolve, reject) => {
       axios.get(this.endpoint + 'auth/session/wait/' + sessionId)
-        .then((result) => {
+        .then(async (result) => {
+          this.sdk = new SDK(this.caelum, this.did, result.data.tokenApi, this.endpoint)
+          if (result.data.isAdmin) {
+            this.parameters = await this.sdk.getParameters()
+          }
           resolve(result.data)
         })
         .catch(() => {
@@ -74,13 +80,9 @@ module.exports = class Organization {
     })
   }
 
-  /**
-   * open an SDK Instance.
-   */
-  openSdK (tokenApi) {
-    // Must be loggedIn
-    const sdk = new SDK(this.caelum, this.did, tokenApi, this.endpoint)
-    return sdk
+  async setSession (tokenApi, isAdmin) {
+    this.sdk = new SDK(this.caelum, this.did, tokenApi, this.endpoint)
+    this.parameters = (isAdmin) ? await this.sdk.getParameters() : false
   }
 
   /**

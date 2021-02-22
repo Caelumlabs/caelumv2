@@ -113,9 +113,7 @@ module.exports = class User {
     return new Promise((resolve) => {
       axios.put(this.orgs[did].endpoint + 'auth/session', postData)
         .then((session) => {
-          console.log('Go1')
           this.sessions[did] = session.data
-          console.log('Go2', this.sessions[did])
           resolve(this.sessions[did])
         })
         .catch((e) => {

@@ -22,8 +22,16 @@ const login = async (did) => {
 
     // Web. Wait for the login to be fullfilled
     idspace.waitSession(session.sessionId)
-    .then(result => {
-      console.log('Logged In', result)
+    .then(async result => {
+      console.log('Logged In', result.user.currentGivenName)
+      const users = await idspace.sdk.getUsers()
+      // console.log(users)
+
+      const webSessionOrg = await caelum.loadOrganization(did)
+      await webSessionOrg.setSession(idspace.sdk.tokenApi, result.isAdmin)
+      const usersWeb = await webSessionOrg.sdk.getUsers()
+      console.log(usersWeb)
+
       resolve()
     })
 
@@ -32,6 +40,8 @@ const login = async (did) => {
     const user = await caelum.newUser(adminInfo)
     await user.loginConnectionString(session.connectionString)
     console.log('Waiting')
+
+
   })
 }
 
