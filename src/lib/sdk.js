@@ -21,11 +21,12 @@ module.exports = class SDK {
   /**
    * Constructor. It creates a User object.
    */
-  constructor (caelum, did, tokenApi, endpoint) {
+  constructor (caelum, did, tokenApi, endpoint, capacity) {
     this.caelum = caelum
     this.did = did
     this.tokenApi = tokenApi
     this.endpoint = endpoint
+    this.capacity = capacity
   }
 
   call (api, call, extra = {}) {

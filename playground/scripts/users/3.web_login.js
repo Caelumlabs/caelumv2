@@ -25,7 +25,7 @@ const login = async (did) => {
     .then(async result => {
       console.log('Logged In', result.user.currentGivenName)
       const webSessionOrg = await caelum.loadOrganization(did)
-      await webSessionOrg.setSession(idspace.sdk.tokenApi, result.isAdmin)
+      await webSessionOrg.setSession(idspace.sdk.tokenApi, result.capacity)
 
       // add a new user
       const user = {
@@ -64,7 +64,7 @@ const login = async (did) => {
     // Mobile App : Login.
     const adminInfo = require('./admin.user.json')
     const user = await caelum.newUser(adminInfo)
-    await user.loginConnectionString(session.connectionString)
+    await user.loginConnectionString(session.connectionString, 'admin')
     console.log('Waiting')
 
 

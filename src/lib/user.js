@@ -140,9 +140,9 @@ module.exports = class User {
   * Connection wit a connection String
   * @param {string} connectionString QR Code
   **/
-  async loginConnectionString (connectionString) {
+  async loginConnectionString (connectionString, capacity) {
     const connStr = connectionString.split('-')
-    return this.login(connStr[2], connStr[1])
+    return this.login(connStr[2], capacity, connStr[1])
   }
 
   /**
