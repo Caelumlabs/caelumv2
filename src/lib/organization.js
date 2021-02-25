@@ -50,9 +50,9 @@ module.exports = class Organization {
   /**
    * Creates a new session.
    */
-  getSession () {
+  getSession (capacity) {
     return new Promise((resolve, reject) => {
-      axios.post(this.endpoint + 'auth/session')
+      axios.post(this.endpoint + 'auth/session', { capacity })
         .then((result) => {
           // 1 - login/register to Tabit network (last param)
           const connectionString = '1-' + result.data.sessionId + '-' + this.did + '-1'
@@ -80,9 +80,9 @@ module.exports = class Organization {
     })
   }
 
-  async setSession (tokenApi, isAdmin) {
+  async setSession (tokenApi, capacity) {
     this.sdk = new SDK(this.caelum, this.did, tokenApi, this.endpoint)
-    this.parameters = (isAdmin) ? await this.sdk.getParameters() : false
+    this.parameters = (capacity === 'admin') ? await this.sdk.getParameters() : false
   }
 
   /**

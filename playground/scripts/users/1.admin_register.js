@@ -16,7 +16,7 @@ const register = async (did, secretCode) => {
   const user = await caelum.newUser()
 
   // Opens a new session with the Idspace
-  const idspace = await caelum.loadOrganization(did)
+  const idspace = await caelum.loadOrganization(did, true)
   const session = await idspace.getSession()
   console.log('QR Code : ' + session.connectionString)
 
@@ -38,7 +38,7 @@ const main = async () => {
   utils.start()
   // const seed = await utils.ask('Governanace Root Seed')
   // const password = await utils.ask('Root Password')
-  await register('5DhaoaHnEM5qeBzgEAwaM8kgXfxmA9BbKFYsDpuYCCrDbrtF', '1')
+  await register('5Gge54aRGqSjKCp76E7PPkVfKg4GxwNZQxX1QGWU6g5b5MeJ', '1')
   utils.end()
 }
 main()

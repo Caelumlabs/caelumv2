@@ -92,27 +92,40 @@ module.exports = class User {
     return this.register(org, connStr[1], secretCode)
   }
 
+  findCredential (did, capacity) {
+    for (const item in this.credentials) {
+      if (this.credentials[item].did === did &&
+        this.credentials[item].subject.credentialSubject.capacity === capacity) {
+        return this.credentials[item].subject
+      }
+    }
+    return false
+  }
+
   /**
    * Register a new organization
    *
    * @param {srting} did Organization to register with
    * @param {string} sessionId Session ID
    */
-  async login (did, _sessionId = 0) {
-    const sessionId = (_sessionId === 0) ? (await this.orgs[did].getSession()).sessionId : _sessionId
+  async login (did, capacity, _sessionId = 0) {
+    const sessionId = (_sessionId === 0) ? (await this.orgs[did].getSession(capacity)).sessionId : _sessionId
     const governanceKey = await Blockchain.getKeys(this.connections[did].governance)
     const signature = Crypto.u8aToHex(Crypto.signMessage(sessionId, governanceKey.keyPair))
+
     const postData = {
       action: 'login',
       peerDid: this.connections[did].peerDid,
       sessionId: sessionId,
       signature: signature,
       challenge: Crypto.hash(Crypto.random()),
-      approved: true
+      approved: true,
+      credential: this.findCredential(did, capacity)
     }
     return new Promise((resolve) => {
       axios.put(this.orgs[did].endpoint + 'auth/session', postData)
         .then((session) => {
+          console.log(session.data)
           this.sessions[did] = session.data
           resolve(this.sessions[did])
         })

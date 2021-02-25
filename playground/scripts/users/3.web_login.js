@@ -1,5 +1,6 @@
 // Utils.
 const utils = require('../../utils/index')
+const faker = require('faker')
 
 // Caelum Lib.
 const Caelum = require('../../../src/index')
@@ -18,19 +19,44 @@ const login = async (did) => {
     // Web : Open a session.
     const idspace = await caelum.loadOrganization(did)
     const session = await idspace.getSession()
-    console.log('QR Code : ' + session.connectionString)
 
     // Web. Wait for the login to be fullfilled
     idspace.waitSession(session.sessionId)
     .then(async result => {
       console.log('Logged In', result.user.currentGivenName)
-      const users = await idspace.sdk.getUsers()
-      // console.log(users)
-
       const webSessionOrg = await caelum.loadOrganization(did)
       await webSessionOrg.setSession(idspace.sdk.tokenApi, result.isAdmin)
-      const usersWeb = await webSessionOrg.sdk.getUsers()
-      console.log(usersWeb)
+
+      // add a new user
+      const user = {
+        currentGivenName: faker.name.firstName(),
+        currentFamilyName: faker.name.lastName(),
+        email: faker.internet.email(),
+        telephone: '....',
+        govId: faker.random.uuid()
+      }
+      let resultPost = await webSessionOrg.sdk.call('user', 'add', {data: user})
+      const userId = resultPost.userId
+
+      // Issue capacity
+      const capacity = { userId: userId, subject: 'member-technology' }
+      resultPost = await webSessionOrg.sdk.call('user', 'issue', {data: capacity})
+
+      let usersWeb = await webSessionOrg.sdk.call('user', 'getAll')
+      console.log('Total users: ', usersWeb.length)
+
+      const user1 = await webSessionOrg.sdk.call('user', 'getOne', {params: [userId]})
+      console.log('user', user1)
+
+      // Call Delete
+      resultPost = await webSessionOrg.sdk.call('user', 'delete', {params: [userId]})
+      console.log(resultPost)
+      usersWeb = await webSessionOrg.sdk.call('user', 'getAll')
+      console.log('Total users: ', usersWeb.length)
+
+      // Add Tag
+
+      // Get all tags
 
       resolve()
     })
@@ -52,7 +78,7 @@ const main = async () => {
   utils.start()
   // const seed = await utils.ask('Governanace Root Seed')
   // const password = await utils.ask('Root Password')
-  await login('5DhaoaHnEM5qeBzgEAwaM8kgXfxmA9BbKFYsDpuYCCrDbrtF')
+  await login('5Gge54aRGqSjKCp76E7PPkVfKg4GxwNZQxX1QGWU6g5b5MeJ')
   utils.end()
 }
 main()

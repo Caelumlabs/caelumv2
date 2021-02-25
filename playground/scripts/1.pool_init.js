@@ -14,7 +14,7 @@ const ROOT_LEVEL = 10
 const init = async (seed, password) => {
   // Connect Caelum-SDK & Create a new Root Organization. Governanace Level 0
   const caelum = new Caelum(STORAGE, GOVERNANCE)
-  const pool = await caelum.newOrganization()
+  const pool = await caelum.newOrganization(false, true)
 
   // Log.
   utils.logV('DID', pool.did)
