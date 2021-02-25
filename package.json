@@ -1,6 +1,6 @@
 {
   "name": "caelum",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Caelum libraries",
   "main": "src/index.js",
   "repository": "https://github.com/Caelumlabs/caelum.git",
