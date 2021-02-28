@@ -1,9 +1,9 @@
 // Utils.
-const utils = require('../utils/index')
+const utils = require('./utils/index')
 
 // Caelum Lib.
-const Caelum = require('../../src/index')
-const Blockchain = require('../../src/utils/substrate')
+const Caelum = require('../src/index')
+const Blockchain = require('../src/utils/substrate')
 
 // Constants
 const GOVERNANCE = 'wss://substrate.tabit.caelumapp.com'
@@ -16,7 +16,7 @@ const idspace = async (password, did, seed) => {
 
     // Connect Caelum-SDK & Create a new Root Organization. Governanace Level 0
   const caelum = new Caelum(STORAGE, GOVERNANCE)
-  const pool = await caelum.newOrganization(did)
+  const pool = await caelum.newOrganization(did, true)
 
   // Storage
   utils.spin()

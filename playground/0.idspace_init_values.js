@@ -1,9 +1,9 @@
 // Utils.
-const utils = require('../utils/index')
+const utils = require('./utils/index')
 
 // Caelum Lib.
-const Caelum = require('../../src/index')
-const Blockchain = require('../../src/utils/substrate')
+const Caelum = require('../src/index')
+const Blockchain = require('../src/utils/substrate')
 
 // Constants
 const GOVERNANCE = 'wss://substrate.tabit.caelumapp.com'

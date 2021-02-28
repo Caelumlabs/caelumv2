@@ -108,6 +108,7 @@ module.exports = class Organization {
       const app = new Application()
       app.setSubject(subject.name, subject.type)
         .then(() => {
+          console.log(this.caelum)
           return Storage.createApp(this.caelum.storage, this.keys.storage, subject)
         })
         .then(txId => {

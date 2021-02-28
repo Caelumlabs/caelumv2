@@ -1,9 +1,9 @@
 // Utils.
-const utils = require('../../utils/index')
+const utils = require('./utils/index')
 
 // Caelum Lib.
-const Caelum = require('../../../src/index')
-const Blockchain = require('../../../src/utils/substrate')
+const Caelum = require('../src/index')
+const Blockchain = require('../src/utils/substrate')
 
 // Constants
 const GOVERNANCE = 'wss://substrate.tabit.caelumapp.com'
@@ -36,9 +36,9 @@ const register = async (did, secretCode) => {
 **/
 const main = async () => {
   utils.start()
-  // const seed = await utils.ask('Governanace Root Seed')
-  // const password = await utils.ask('Root Password')
-  await register('5Gge54aRGqSjKCp76E7PPkVfKg4GxwNZQxX1QGWU6g5b5MeJ', '1')
+  const did = await utils.ask('DID')
+  const secret= await utils.ask('Secret Code')
+  await register(did, secret)
   utils.end()
 }
 main()
