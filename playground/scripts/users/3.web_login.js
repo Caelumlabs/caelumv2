@@ -25,7 +25,7 @@ const login = async (did) => {
     .then(async result => {
       console.log('Logged In', result.user.currentGivenName)
       const webSessionOrg = await caelum.loadOrganization(did)
-      await webSessionOrg.setSession(idspace.sdk.tokenApi, result.capacity)
+      await webSessionOrg.setSession(result.tokenApi, result.capacity)
 
       // add a new user
       const user = {

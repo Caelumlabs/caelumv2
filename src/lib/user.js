@@ -65,7 +65,6 @@ module.exports = class User {
             })
           })
           .then((result) => {
-            console.log(result.data)
             // Save to list of connections
             this.credentials[result.data.hashId] = {
               peerDid: this.connections[org.did].peerDid,
@@ -125,7 +124,6 @@ module.exports = class User {
     return new Promise((resolve) => {
       axios.put(this.orgs[did].endpoint + 'auth/session', postData)
         .then((session) => {
-          console.log(session.data)
           this.sessions[did] = session.data
           resolve(this.sessions[did])
         })

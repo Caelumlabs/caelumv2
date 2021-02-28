@@ -11,6 +11,17 @@ const methods = {
       getOne: { action: 'get', auth: true },
       delete: { action: 'delete', auth: true }
     }
+  },
+  tag: {
+    endpoint: 'tags',
+    methods: {
+      add: { action: 'post', auth: true },
+      issue: { action: 'put', auth: true },
+      getAll: { action: 'get', auth: true },
+      getOne: { action: 'get', auth: true },
+      getIssued: { action: 'get', submethod: 'issued', auth: true },
+      revoke: { action: 'delete', submethod: 'issued', auth: true }
+    }
   }
 }
 
@@ -62,10 +73,13 @@ module.exports = class SDK {
         promise
           .then(res => resolve(res.data))
           .catch(e => {
+            console.log('Axios failed', e.status)
             resolve(false)
-          }
-          )
-      } else { resolve(false) }
+          })
+      } else {
+        console.log('Error')
+        resolve(false)
+      }
     })
   }
 
