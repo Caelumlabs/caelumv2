@@ -16,13 +16,28 @@ const sdk = async (did) => {
   const caelum = new Caelum(STORAGE, GOVERNANCE)
   const adminInfo = require('./admin.user.json')
   const user = await caelum.newUser(adminInfo)
-  await user.login(did, 'admin')
-
   const idspace = await caelum.loadOrganization(did)
-  await idspace.setSession(user.sessions[did].tokenApi, user.sessions[did].capacity)
 
+  // Login as admin
+  await user.login(did, 'admin')
+  await idspace.setSession(user.sessions[did].tokenApi, user.sessions[did].capacity)
   let users = await idspace.sdk.call('user', 'getAll')
-  console.log('Total users: ', users.length)
+  console.log('Total users: ', users.length, users)
+
+  // Issue a new capacity.
+  const capacity = { userId: users[0].id, subject: 'member-technology' }
+  let result = await idspace.sdk.call('user', 'issue', {data: capacity})
+
+  // Get Notifications
+  await user.login(did, 'peerdid')
+  await idspace.setSession(user.sessions[did].tokenApi, user.sessions[did].capacity)
+  const notifications = await idspace.sdk.call('auth', 'notifications')
+  await user.claim(idspace, notifications[0].id)
+
+  const userJson = await user.export()
+  await utils.saveFile('admin.user', userJson)
+/*
+
 
   // add a new user
   const userForm = {
@@ -49,6 +64,7 @@ const sdk = async (did) => {
   resultPost = await idspace.sdk.call('user', 'delete', {params: [userId]})
   users = await idspace.sdk.call('user', 'getAll')
   console.log('Total users: ', users.length)
+  */
 }
 
 /**
@@ -56,8 +72,8 @@ const sdk = async (did) => {
 **/
 const main = async () => {
   utils.start()
-  const did = await utils.ask('DID')
-  await sdk('5Hg8EcpAXQb9PZV3MmWpfSSJKDNaX3C7xmJsKctjZSwg8Wbo')
+  // const did = await utils.ask('DID')
+  await sdk('5C9yX9aaPuxfawjttBrZhp4M1ACoo8ZRtNtScCGy8aZVTbeG')
   utils.end()
 }
 main()

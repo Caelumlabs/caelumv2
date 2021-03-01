@@ -10,7 +10,6 @@ const Crypto = Caelum.loadCrypto()
 const GOVERNANCE = 'wss://substrate.tabit.caelumapp.com'
 const STORAGE = 'https://api.bigchaindb.caelumapp.com/api/v1/'
 
-const poolInfo = require('../certificates/pool.org.json')
 
 // Main function.
 const load = async (did) => {

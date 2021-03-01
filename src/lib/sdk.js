@@ -2,11 +2,23 @@
 const axios = require('axios')
 
 const methods = {
+  parameter: {
+    endpoint: 'parameter',
+    methods: {
+      getAll: { action: 'get', auth: true }
+    }
+  },
+  auth: {
+    endpoint: 'auth',
+    methods: {
+      notifications: { action: 'get', submethod: 'notifications', auth: true }
+    }
+  },
   user: {
     endpoint: 'user',
     methods: {
       add: { action: 'post', auth: true },
-      issue: { action: 'post', submetohd: 'capacity', auth: true },
+      issue: { action: 'post', submethod: 'capacity', auth: true },
       getAll: { action: 'get', auth: true },
       getOne: { action: 'get', auth: true },
       delete: { action: 'delete', auth: true }
@@ -52,7 +64,8 @@ module.exports = class SDK {
 
         // Build endpooint.
         endpoint = this.endpoint + methods[api].endpoint
-        if (method.submetohd) endpoint += '/' + method.submetohd
+        if (method.submethod) endpoint += '/' + method.submethod
+
         for (let i = 0; i < params.length; i++) endpoint += '/' + params[i]
 
         // API Method : GET, POST, PUT,  DELETE

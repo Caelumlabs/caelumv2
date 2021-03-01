@@ -78,6 +78,16 @@ module.exports = class User {
     })
   }
 
+  async claim (org, notId) {
+    const credential = await org.sdk.call('auth', 'notifications', { params: [notId] })
+    this.credentials[credential.hashId] = {
+      peerDid: credential.user.peerDid,
+      did: org.did,
+      subject: credential.signedCredential
+    }
+    return credential.signedCredential
+  }
+
   /**
    * Register a new organization
    *
@@ -119,7 +129,7 @@ module.exports = class User {
       signature: signature,
       challenge: Crypto.hash(Crypto.random()),
       approved: true,
-      credential: this.findCredential(did, capacity)
+      credential: (capacity === 'peerdid') ? false : this.findCredential(did, capacity)
     }
     return new Promise((resolve) => {
       axios.put(this.orgs[did].endpoint + 'auth/session', postData)
