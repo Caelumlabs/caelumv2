@@ -32,39 +32,13 @@ const sdk = async (did) => {
   await user.login(did, 'peerdid')
   await idspace.setSession(user.sessions[did].tokenApi, user.sessions[did].capacity)
   const notifications = await idspace.sdk.call('auth', 'notifications')
+
+  // Claim capacity for the user.
   await user.claim(idspace, notifications[0].id)
 
+  // The wallet has been updated. Save changes.
   const userJson = await user.export()
   await utils.saveFile('admin.user', userJson)
-/*
-
-
-  // add a new user
-  const userForm = {
-    currentGivenName: faker.name.firstName(),
-    currentFamilyName: faker.name.lastName(),
-    email: faker.internet.email(),
-    telephone: '....',
-    govId: faker.random.uuid()
-  }
-  let resultPost = await idspace.sdk.call('user', 'add', {data: userForm})
-  const userId = resultPost.userId
-
-  // Issue capacity
-  const capacity = { userId: userId, subject: 'member-technology' }
-  resultPost = await idspace.sdk.call('user', 'issue', {data: capacity})
-
-  users = await idspace.sdk.call('user', 'getAll')
-  console.log('Total users: ', users.length)
-
-  const user1 = await idspace.sdk.call('user', 'getOne', {params: [userId]})
-  console.log('user', user1)
-
-  // Call Delete
-  resultPost = await idspace.sdk.call('user', 'delete', {params: [userId]})
-  users = await idspace.sdk.call('user', 'getAll')
-  console.log('Total users: ', users.length)
-  */
 }
 
 /**

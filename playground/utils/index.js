@@ -57,5 +57,7 @@ module.exports = {
     extractDid: (signedVC) => {
       const issuer = signedVC.issuer.split(':')
       return issuer[2]
-    }
+    },
+    GOVERNANCE: 'wss://substrate.tabit.caelumapp.com',
+    STORAGE: 'https://api.bigchaindb.caelumapp.com/api/v1/'
 }

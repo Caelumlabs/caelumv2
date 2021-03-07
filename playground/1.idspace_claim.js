@@ -36,7 +36,8 @@ const register = async (did, secretCode) => {
 **/
 const main = async () => {
   utils.start()
-  const did = await utils.ask('DID')
+  // const did = await utils.ask('DID')
+  const did = '5C9yX9aaPuxfawjttBrZhp4M1ACoo8ZRtNtScCGy8aZVTbeG'
   const secret= await utils.ask('Secret Code')
   await register(did, secret)
   utils.end()

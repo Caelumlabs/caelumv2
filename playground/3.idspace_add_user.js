@@ -36,14 +36,14 @@ const sdk = async (did) => {
   // Issue capacity
   const capacity = { userId: userId, subject: 'member-technology' }
   resultPost = await idspace.sdk.call('user', 'issue', {data: capacity})
-
   users = await idspace.sdk.call('user', 'getAll')
   console.log('Total users: ', users.length)
 
+  // Get the user.
   const user1 = await idspace.sdk.call('user', 'getOne', {params: [userId]})
   console.log('user', user1)
 
-  // Call Delete
+  // Delete the user.
   resultPost = await idspace.sdk.call('user', 'delete', {params: [userId]})
   users = await idspace.sdk.call('user', 'getAll')
   console.log('Total users: ', users.length)
