@@ -34,6 +34,25 @@ const methods = {
       getIssued: { action: 'get', submethod: 'issued', auth: true },
       revoke: { action: 'delete', submethod: 'issued', auth: true }
     }
+  },
+  api: {
+    endpoint: 'api',
+    methods: {
+      add: { action: 'post', auth: true },
+      update: { action: 'put', auth: true },
+      getOne: { action: 'get', auth: true },
+      getAll: { action: 'get', auth: true }
+    }
+  },
+  ide: {
+    endpoint: 'ide',
+    methods: {
+      addProject: { action: 'post', submethod: 'project', auth: true },
+      getOneProject: { action: 'get', submethod: 'project', auth: true },
+      getAllProjects: { action: 'get', submethod: 'project', auth: true },
+      updateProject: { action: 'put', submethod: 'project', auth: true },
+      deleteProject: { action: 'delete', submethod: 'project', auth: true }
+    }
   }
 }
 
@@ -67,8 +86,8 @@ module.exports = class SDK {
         if (method.submethod) endpoint += '/' + method.submethod
 
         for (let i = 0; i < params.length; i++) endpoint += '/' + params[i]
-
         // API Method : GET, POST, PUT,  DELETE
+        console.log(method.action + ' ' + endpoint)
         switch (method.action) {
           case 'get' :
             promise = axios.get(endpoint, headers)
