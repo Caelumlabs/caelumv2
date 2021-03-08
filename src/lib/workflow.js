@@ -66,11 +66,9 @@ module.exports = class Workflow {
     return new Promise(resolve => {
       const form = new FormData()
       form.append('file', fileData, { filepath: filePath, contentType: contentType })
-      console.log(this.workflow)
       form.append('workflow', JSON.stringify(this.workflow))
       axios.post(this.org.endpoint + 'workflow/upload', form, { headers: form.getHeaders() })
         .then(result => {
-          console.log(result.data)
           resolve(result.data.stateId)
         })
         .catch((e) => {
@@ -87,7 +85,6 @@ module.exports = class Workflow {
   set () {
     return new Promise(resolve => {
       const workflowPost = { ...this.workflow, ...this.params[this.workflow.actionId] }
-      console.log(workflowPost)
       axios.post(this.org.endpoint + 'workflow/set', workflowPost)
         .then(result => {
           this.workflow.stateId = result.data.stateId

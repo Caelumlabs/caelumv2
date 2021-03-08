@@ -36,14 +36,7 @@ const register = async (did, secretCode) => {
 **/
 const main = async () => {
   utils.start()
-  // const did = await utils.ask('DID')
-  const did = '5C9yX9aaPuxfawjttBrZhp4M1ACoo8ZRtNtScCGy8aZVTbeG'
-<<<<<<< HEAD
-  const secret= await utils.ask('Secret Code')
-=======
-  const secret = await utils.ask('Secret Code')
->>>>>>> upstream/main
-  await register(did, secret)
+  await register('5C9yX9aaPuxfawjttBrZhp4M1ACoo8ZRtNtScCGy8aZVTbeG', '1')
   utils.end()
 }
 main()

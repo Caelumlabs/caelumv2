@@ -51,7 +51,21 @@ const methods = {
       getOneProject: { action: 'get', submethod: 'project', auth: true },
       getAllProjects: { action: 'get', submethod: 'project', auth: true },
       updateProject: { action: 'put', submethod: 'project', auth: true },
-      deleteProject: { action: 'delete', submethod: 'project', auth: true }
+      deleteProject: { action: 'delete', submethod: 'project', auth: true },
+      addWorkflow: { action: 'post', submethod: 'workflow', auth: true },
+      getOneWorkflow: { action: 'get', submethod: 'workflow', auth: true },
+      getAllWorkflows: { action: 'get', submethod: 'workflow', auth: true },
+      updateWorkflow: { action: 'put', submethod: 'workflow', auth: true },
+      deployWorkflow: { action: 'put', submethod: 'workflow/deploy', auth: true },
+      deleteWorkflow: { action: 'delete', submethod: 'workflow', auth: true }
+    }
+  },
+  workflow: {
+    endpoint: 'workflow',
+    methods: {
+      call: { action: 'post', auth: true },
+      upload: { action: 'post', auth: true },
+      download: { action: 'post', auth: true }
     }
   }
 }
@@ -87,7 +101,6 @@ module.exports = class SDK {
 
         for (let i = 0; i < params.length; i++) endpoint += '/' + params[i]
         // API Method : GET, POST, PUT,  DELETE
-        console.log(method.action + ' ' + endpoint)
         switch (method.action) {
           case 'get' :
             promise = axios.get(endpoint, headers)

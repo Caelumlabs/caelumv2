@@ -17,8 +17,30 @@ const sdk = async (did) => {
   await user.login(did, 'admin')
   await idspace.setSession(user.sessions[did].tokenApi, user.sessions[did].capacity)
 
-  // Get API Infor
-  let api = await idspace.sdk.call('api', 'getOne', {params: [1]})
+  const auth = {
+    url: "https:77tramit.com",
+    username: "caelum",
+    password: "hello"
+  }
+  const endpoints = [
+    {
+      method: "POST",
+      url: "https:/7tarmit.com",
+      name: "feedback"
+    }
+  ]
+  const apiForm = {
+    name: 'Tramit',
+    description: 'Tramit - integració',
+    integrationTypeId : 2,
+    authenticationId: 3,
+    authConfiguration: JSON.stringify(auth),
+    endpoints: JSON.stringify(endpoints)
+  }
+  let api = await idspace.sdk.call('api', 'add', {data: apiForm})
+
+  // Get API Information.
+  api = await idspace.sdk.call('api', 'getOne', {params: [1]})
   // console.log('API', api)
 
   console.log('GET All API')

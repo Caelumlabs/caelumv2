@@ -108,7 +108,6 @@ module.exports = class Organization {
       const app = new Application()
       app.setSubject(subject.name, subject.type)
         .then(() => {
-          console.log(this.caelum)
           return Storage.createApp(this.caelum.storage, this.keys.storage, subject)
         })
         .then(txId => {
@@ -484,13 +483,11 @@ module.exports = class Organization {
       promise
         .then((result) => {
           certApp = result
-          console.log(certApp)
           const certsTxId = certApp.subject.certificates
           return Storage.getLastTransaction(this.caelum.storage, certsTxId)
         })
         .then((result) => {
           const lastAppTx = result
-          console.log(lastAppTx)
           return Storage.transferAsset(this.caelum.storage, lastAppTx, this.keys.storage, TX_TAG_TYPE, achievement.subject, this.keys.storage.publicKey)
         })
         .then((result) => {
@@ -693,9 +690,8 @@ module.exports = class Organization {
     await this.caelum.governance.transferTokensNoFees(address, amountTransfer)
 
     // assign new owner.
-    console.log('Register 4')
+    console.log('TODO : changeOwner??')
     // await this.caelum.governance.changeOwner(did, address)
-    console.log('Register 5')
   }
 
   getWorkflow (workflowId, stateId = 0, partyId = 1, actionId = 1) {

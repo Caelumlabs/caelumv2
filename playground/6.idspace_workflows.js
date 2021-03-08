@@ -40,7 +40,9 @@ const sdk = async (did) => {
   console.log('Project', projects)
 
   // Add one workflow.
-  const workflow = await idspace.sdk.call('ide', 'addWorkflow', {params: [projectId]})
+  const workflowForm = require('./workflows/wf1.json')
+  const workflow = await idspace.sdk.call('ide', 'addWorkflow', {data: workflowForm})
+  console.log(workflow)
 
   // Save Workflow
 
