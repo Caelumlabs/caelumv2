@@ -1,6 +1,7 @@
 // Utils.
 const utils = require('./utils/index')
 const faker = require('faker')
+require('dotenv').config()
 const Caelum = require('../src/index')
 
 // Constants
@@ -18,14 +19,14 @@ const sdk = async (did) => {
   await idspace.setSession(user.sessions[did].tokenApi, user.sessions[did].capacity)
 
   const auth = {
-    url: "https:77tramit.com",
+    url: "https://api.pre.apptramit.com/authorize/login",
     username: "caelum",
-    password: "hello"
+    password: "9T9HdY7RqK6nW8Zw"
   }
   const endpoints = [
     {
       method: "POST",
-      url: "https:/7tarmit.com",
+      url: "https://api.pre.apptramit.com/process-request/feedback",
       name: "feedback"
     }
   ]
@@ -56,7 +57,7 @@ const sdk = async (did) => {
 const main = async () => {
   utils.start()
   // const did = await utils.ask('DID')
-  await sdk('5C9yX9aaPuxfawjttBrZhp4M1ACoo8ZRtNtScCGy8aZVTbeG')
+  await sdk(process.env.DID)
   utils.end()
 }
 main()

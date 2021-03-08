@@ -1,19 +1,16 @@
 // Utils.
 const utils = require('./utils/index')
 const faker = require('faker')
+require('dotenv').config()
 
 // Caelum Lib.
 const Caelum = require('../src/index')
 const Blockchain = require('../src/utils/substrate')
 
-// Constants
-const GOVERNANCE = 'wss://substrate.tabit.caelumapp.com'
-const STORAGE = 'https://api.bigchaindb.caelumapp.com/api/v1/'
-
 // Main function.
 const sdk = async (did) => {
   // Connect Caelum-SDK & Create a new Root Organization. Governanace Level 0
-  const caelum = new Caelum(STORAGE, GOVERNANCE)
+  const caelum = new Caelum(utils.STORAGE, utils.GOVERNANCE)
   const adminInfo = require('./admin.user.json')
   const user = await caelum.newUser(adminInfo)
   const idspace = await caelum.loadOrganization(did)
@@ -55,7 +52,7 @@ const sdk = async (did) => {
 const main = async () => {
   utils.start()
   // const did = await utils.ask('DID')
-  await sdk('5C9yX9aaPuxfawjttBrZhp4M1ACoo8ZRtNtScCGy8aZVTbeG')
+  await sdk(process.env.DID)
   utils.end()
 }
 main()

@@ -56,16 +56,19 @@ const methods = {
       getOneWorkflow: { action: 'get', submethod: 'workflow', auth: true },
       getAllWorkflows: { action: 'get', submethod: 'workflow', auth: true },
       updateWorkflow: { action: 'put', submethod: 'workflow', auth: true },
-      deployWorkflow: { action: 'put', submethod: 'workflow/deploy', auth: true },
-      deleteWorkflow: { action: 'delete', submethod: 'workflow', auth: true }
+      deleteWorkflow: { action: 'delete', submethod: 'workflow', auth: true },
+      saveDraft: { action: 'put', submethod: 'workflow/draft', auth: true },
+      deploy: { action: 'put', submethod: 'workflow/deploy', auth: true },
+      states: { action: 'get', submethod: 'workflow/states', auth: true }
     }
   },
   workflow: {
     endpoint: 'workflow',
     methods: {
-      call: { action: 'post', auth: true },
-      upload: { action: 'post', auth: true },
-      download: { action: 'post', auth: true }
+      set: { action: 'post', submethod: 'set', auth: false },
+      upload: { action: 'form', submethod: 'upload', auth: false },
+      download: { action: 'get', submethod: 'download', auth: false },
+      approve: { action: 'post', submethod: 'approve', auth: false }
     }
   }
 }
@@ -94,12 +97,13 @@ module.exports = class SDK {
         const headers = method.auth ? { headers: { Authorization: `Bearer ${this.tokenApi}` } } : {}
         const params = extra.params || []
         const data = extra.data || {}
+        const form = extra.form || {}
 
         // Build endpooint.
         endpoint = this.endpoint + methods[api].endpoint
         if (method.submethod) endpoint += '/' + method.submethod
-
         for (let i = 0; i < params.length; i++) endpoint += '/' + params[i]
+        // console.log(method.action + ' ' + endpoint)
         // API Method : GET, POST, PUT,  DELETE
         switch (method.action) {
           case 'get' :
@@ -113,6 +117,9 @@ module.exports = class SDK {
             break
           case 'put':
             promise = axios.put(endpoint, data, headers)
+            break
+          case 'form':
+            promise = axios.post(endpoint, form, { headers: form.getHeaders() })
             break
         }
         promise

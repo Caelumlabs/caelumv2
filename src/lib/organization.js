@@ -80,6 +80,10 @@ module.exports = class Organization {
     })
   }
 
+  async startSdk () {
+    this.sdk = new SDK(this.caelum, this.did, '', this.endpoint, 'peerdid')
+  }
+
   async setSession (tokenApi, capacity) {
     this.sdk = new SDK(this.caelum, this.did, tokenApi, this.endpoint, capacity)
     this.parameters = (capacity === 'admin') ? await this.sdk.call('parameter', 'getAll') : false

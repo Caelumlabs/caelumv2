@@ -2,8 +2,10 @@
 const utils = require('./utils/index')
 const faker = require('faker')
 const Caelum = require('../src/index')
-
-// Constants
+const FormData = require('form-data')
+const fs = require('fs')
+const filePath = __dirname + '/assets/test.jpg'
+require('dotenv').config()
 
 // Main function.
 const sdk = async (did) => {
@@ -27,35 +29,70 @@ const sdk = async (did) => {
   let result = await idspace.sdk.call('ide', 'addProject', {data: projectForm})
   const projectId = result.id
   
-  // Get All projects
-  let projects = await idspace.sdk.call('ide', 'getAllProjects')
-  console.log('Projects: ', projects.length)
-
   // Update project Name.
   projectForm.name = 'Project Final'
   result = await idspace.sdk.call('ide', 'updateProject', {data: projectForm, params: [projectId]})
   
   // Get One projects
-  projects = await idspace.sdk.call('ide', 'getOneProject', {params: [projectId]})
-  console.log('Project', projects)
+  let projects = await idspace.sdk.call('ide', 'getAllProjects')
 
   // Add one workflow.
   const workflowForm = require('./workflows/wf1.json')
-  const workflow = await idspace.sdk.call('ide', 'addWorkflow', {data: workflowForm})
-  console.log(workflow)
+  workflowForm.projectId = projectId
+  let workflow = await idspace.sdk.call('ide', 'addWorkflow', {data: workflowForm})
+  workflowForm.workflowId = workflow.workflowId
+  workflow = await idspace.sdk.call('ide', 'saveDraft', {data: workflowForm})
+  workflow = await idspace.sdk.call('ide', 'deploy', {data: workflowForm})
 
-  // Save Workflow
+  workflow = await idspace.sdk.call('ide', 'getOneWorkflow', {params: [workflowForm.workflowId]})
+  const apiToken = workflow.info.parties[0].apiToken
+  console.log('Workflow ID ' + workflowForm.workflowId)
+  console.log('API Token ' + apiToken)
 
-  // Deploy Workflow
+  // Call Workflow
+  const callWF = {
+    stateId: 0,
+    workflowId: workflowForm.workflowId,
+    actionId: 1,
+    partyId: 1,
+    apiToken: apiToken,
+    ciutada_currentGivenName: faker.name.firstName(),
+    ciutada_currentFamilyName: faker.name.lastName(),
+    ciutada_email: faker.internet.email(),
+    ciutada_telephone: '+34 678 54 43 57',
+    ciutada_currentGivenName: '34753074M',
+    coordenades_longitude: '1',
+    coordenades_latitude: '2'
+  }
+  result = await idspace.sdk.call('workflow', 'set', {data: callWF})
+  const stateId = result.stateId
 
-  // Edit Workflow
+  const imageData = fs.readFileSync(filePath)
+  const form = new FormData()
+  form.append('file', imageData, { filepath: filePath, contentType: 'image/png' })
+  form.append('workflow', JSON.stringify({
+      stateId: stateId,
+      actionId: 2,
+      partyId: 1,
+      apiToken: apiToken
+    }))
+  await idspace.sdk.call('workflow', 'upload', {form: form})
 
-  // Delete Workflow
+  // Login as tech
+  await user.login(did, 'member-technology')
+  const approveForm = {
+    stateId: stateId,
+    actionId: 3,
+    partyId: 2,
+    approval_status: 'ok',
+    approval_msg: 'This works',
+    apiToken: user.sessions[did].tokenApi
+  }
+  await idspace.sdk.call('workflow', 'approve', {data: approveForm})
 
   // Delete project
   result = await idspace.sdk.call('ide', 'deleteProject', {params: [projectId]})
   projects = await idspace.sdk.call('ide', 'getAllProjects')
-  console.log('Projects: ', projects.length)
 }
 
 /**
@@ -64,7 +101,7 @@ const sdk = async (did) => {
 const main = async () => {
   utils.start()
   // const did = await utils.ask('DID')
-  await sdk('5C9yX9aaPuxfawjttBrZhp4M1ACoo8ZRtNtScCGy8aZVTbeG')
+  await sdk(process.env.DID)
   utils.end()
 }
 main()

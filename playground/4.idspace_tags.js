@@ -1,9 +1,8 @@
 // Utils.
 const utils = require('./utils/index')
 const faker = require('faker')
+require('dotenv').config()
 const Caelum = require('../src/index')
-
-// Constants
 
 // Main function.
 const sdk = async (did) => {
@@ -46,8 +45,7 @@ const sdk = async (did) => {
 **/
 const main = async () => {
   utils.start()
-  // const did = await utils.ask('DID')
-  await sdk('5C9yX9aaPuxfawjttBrZhp4M1ACoo8ZRtNtScCGy8aZVTbeG')
+  await sdk(process.env.DID)
   utils.end()
 }
 main()

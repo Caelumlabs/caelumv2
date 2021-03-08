@@ -1,5 +1,6 @@
 // Utils.
 const utils = require('./utils/index')
+require('dotenv').config()
 
 // Caelum Lib.
 const Caelum = require('../src/index')
@@ -36,7 +37,7 @@ const register = async (did, secretCode) => {
 **/
 const main = async () => {
   utils.start()
-  await register('5C9yX9aaPuxfawjttBrZhp4M1ACoo8ZRtNtScCGy8aZVTbeG', '1')
+  await register(process.env.DID, '1')
   utils.end()
 }
 main()
