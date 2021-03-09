@@ -79,7 +79,8 @@ module.exports = class User {
   }
 
   async claim (org, notId) {
-    const credential = await org.sdk.call('auth', 'notifications', { params: [notId] })
+    const credential = await org.sdk.call('auth', 'claim', { params: [notId] })
+
     this.credentials[credential.hashId] = {
       peerDid: credential.user.peerDid,
       did: org.did,

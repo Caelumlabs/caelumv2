@@ -11,6 +11,7 @@ const methods = {
   auth: {
     endpoint: 'auth',
     methods: {
+      claim: { action: 'get', submethod: 'claim', auth: true },
       notifications: { action: 'get', submethod: 'notifications', auth: true }
     }
   },

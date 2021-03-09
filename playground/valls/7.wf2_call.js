@@ -1,15 +1,14 @@
 // Utils.
+require('dotenv').config()
+const fs = require('fs')
 const utils = require('../utils/index')
 const faker = require('faker')
 const Caelum = require('../../src/index')
 const FormData = require('form-data')
-const fs = require('fs')
-const filePath = __dirname + '/assets/test.jpg'
-require('dotenv').config()
+const filePath = __dirname + '/test.jpg'
 
 // Main function.
 const sdk = async (did) => {
-  // Connect Caelum-SDK & Create a new Root Organization. Governanace Level 0
   const caelum = new Caelum(utils.STORAGE, utils.GOVERNANCE)
   const adminInfo = require('./admin.user.json')
   const user = await caelum.newUser(adminInfo)
@@ -17,8 +16,8 @@ const sdk = async (did) => {
   await idspace.startSdk()
 
   // Call Workflow
-  const workflowId = 1
-  const apiToken = '09efbf4c5b07c69e0525516c'
+  const workflowId = 2
+  const apiToken = '86ff104a4f714864a1ca48cc'
   const callWF = {
     stateId: 0,
     workflowId: workflowId,
@@ -28,8 +27,8 @@ const sdk = async (did) => {
     ciutada_currentGivenName: faker.name.firstName(),
     ciutada_currentFamilyName: faker.name.lastName(),
     ciutada_email: faker.internet.email(),
-    ciutada_telephone: '+34 678 54 43 57',
-    ciutada_currentGivenName: '34753074M',
+    ciutada_telephone: '+34 655 14 42 11',
+    ciutada_currentGivenName: '1222111A',
     coordenades_longitude: '1',
     coordenades_latitude: '2'
   }
@@ -48,6 +47,19 @@ const sdk = async (did) => {
     }))
   await idspace.sdk.call('workflow', 'upload', {form: form})
 
+  // Login as tech
+  
+  // await user.login(did, 'member-technology')
+  /*
+  const approveForm = {
+    stateId: stateId,
+    actionId: 3,
+    partyId: 2,
+    approval_status: 'ok',
+    approval_msg: 'This works',
+    apiToken: user.sessions[did].tokenApi
+  }*/
+  // await idspace.sdk.call('workflow', 'approve', {data: approveForm})
 }
 
 /**
@@ -55,7 +67,8 @@ const sdk = async (did) => {
 **/
 const main = async () => {
   utils.start()
-  await sdk('5HTTjSwL7z9P7mefGpJ1DWRYWiSRFJN52aqAK6aEmUUmi2sB')
+  // const did = await utils.ask('DID')
+  await sdk(process.env.DID_VALLS)
   utils.end()
 }
 main()

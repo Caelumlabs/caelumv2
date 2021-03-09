@@ -1,7 +1,7 @@
 // Utils.
-const utils = require('../utils/index')
+const utils = require('./utils/index')
 const faker = require('faker')
-const Caelum = require('../../src/index')
+const Caelum = require('../src/index')
 const FormData = require('form-data')
 const fs = require('fs')
 const filePath = __dirname + '/assets/test.jpg'
@@ -18,7 +18,7 @@ const sdk = async (did) => {
 
   // Call Workflow
   const workflowId = 1
-  const apiToken = '09efbf4c5b07c69e0525516c'
+  const apiToken = '1dfb9f566bbe390886f9b2b5'
   const callWF = {
     stateId: 0,
     workflowId: workflowId,
@@ -55,7 +55,8 @@ const sdk = async (did) => {
 **/
 const main = async () => {
   utils.start()
-  await sdk('5HTTjSwL7z9P7mefGpJ1DWRYWiSRFJN52aqAK6aEmUUmi2sB')
+  // const did = await utils.ask('DID')
+  await sdk(process.env.DID)
   utils.end()
 }
 main()

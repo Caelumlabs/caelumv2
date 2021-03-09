@@ -69,9 +69,8 @@ module.exports = class Organization {
       axios.get(this.endpoint + 'auth/session/wait/' + sessionId)
         .then(async (result) => {
           this.sdk = new SDK(this.caelum, this.did, result.data.tokenApi, this.endpoint)
-          if (result.data.isAdmin) {
-            this.parameters = await this.sdk.getParameters()
-          }
+          console.log(result.data)
+          this.parameters = (result.data.capacity === 'admin') ? await this.sdk.call('parameter', 'getAll') : false
           resolve(result.data)
         })
         .catch(() => {

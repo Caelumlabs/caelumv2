@@ -1,15 +1,10 @@
-// Utils.
-const utils = require('./utils/index')
-const faker = require('faker')
 require('dotenv').config()
-
-// Caelum Lib.
-const Caelum = require('../src/index')
-const Blockchain = require('../src/utils/substrate')
+const utils = require('../utils/index')
+const faker = require('faker')
+const Caelum = require('../../src/index')
 
 // Main function.
 const sdk = async (did) => {
-  // Connect Caelum-SDK & Create a new Root Organization. Governanace Level 0
   const caelum = new Caelum(utils.STORAGE, utils.GOVERNANCE)
   const adminInfo = require('./admin.user.json')
   const user = await caelum.newUser(adminInfo)
@@ -41,10 +36,6 @@ const sdk = async (did) => {
   const user1 = await idspace.sdk.call('user', 'getOne', {params: [userId]})
   console.log('user', user1)
 
-  // Delete the user.
-  // resultPost = await idspace.sdk.call('user', 'delete', {params: [userId]})
-  // users = await idspace.sdk.call('user', 'getAll')
-  // console.log('Total users: ', users.length)
 }
 
 /**
@@ -52,8 +43,7 @@ const sdk = async (did) => {
 **/
 const main = async () => {
   utils.start()
-  // const did = await utils.ask('DID')
-  await sdk(process.env.DID)
+  await sdk(process.env.DID_VALLS)
   utils.end()
 }
 main()

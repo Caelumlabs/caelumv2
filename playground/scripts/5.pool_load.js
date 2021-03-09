@@ -17,7 +17,7 @@ const load = async (did) => {
   const caelum = new Caelum(STORAGE, GOVERNANCE)
   const pool = await caelum.loadOrganization(did)
   await pool.loadInformation()
-  console.log(pool)
+  console.log(pool.didDocument)
 }
 
 /**
