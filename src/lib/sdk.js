@@ -60,7 +60,8 @@ const methods = {
       deleteWorkflow: { action: 'delete', submethod: 'workflow', auth: true },
       saveDraft: { action: 'put', submethod: 'workflow/draft', auth: true },
       deploy: { action: 'put', submethod: 'workflow/deploy', auth: true },
-      states: { action: 'get', submethod: 'workflow/states', auth: true }
+      getStatesAll: { action: 'get', submethod: 'workflow/state', auth: true },
+      getStatesOne: { action: 'get', submethod: 'workflow/state', auth: true }
     }
   },
   workflow: {
