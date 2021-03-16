@@ -72,6 +72,15 @@ const methods = {
       download: { action: 'get', submethod: 'download', auth: false },
       approve: { action: 'post', submethod: 'approve', auth: false }
     }
+  },
+  plugin: {
+    endpoint: 'plugin',
+    methods: {
+      getAll: { action: 'get', auth: true },
+      getOne: { action: 'get', auth: true },
+      updateStatus: { action: 'put', auth: true },
+      updateConfiguration: { action: 'put', submethod: 'config', auth: true }
+    }
   }
 }
 
