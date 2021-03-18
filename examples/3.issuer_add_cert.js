@@ -1,13 +1,15 @@
 const Caelum = require('../src/index')
-const caelum = new Caelum('https://api.bigchaindb.caelumapp.com/api/v1/')
+const GOVERNANCE = 'wss://substrate.tabit.caelumapp.com'
+const STORAGE = 'https://api.bigchaindb.caelumapp.com/api/v1/'
+const orgJson = require('./orgs/5FcSnjrPBAHkzqgkEz4WtnRGwLHkhHYRjYBKsDHPcozNce7R.json')
 const chalk = require('chalk')
 const log = console.log
-const orgJson = require('./orgs/issuer1.json')
 
 const main = async () => {
-  // Add basic DID and applications.
-  const org = await caelum.loadOrganization(orgJson.createTxId, orgJson.did)
-  await org.setKeys(orgJson.mnemonic)
+  const caelum = new Caelum(STORAGE, GOVERNANCE)
+  const org = await caelum.importOrganization(orgJson, 'test')
+  await org.loadInformation()
+  await org.loadApplications()
 
   const cid = await org.addCertificate({
     title: 'Comerç de proximitat',

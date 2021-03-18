@@ -1,5 +1,5 @@
 // Utils.
-const utils = require('./utils/index')
+const utils = require('./utils')
 
 // Caelum Lib.
 const Caelum = require('../src/index')

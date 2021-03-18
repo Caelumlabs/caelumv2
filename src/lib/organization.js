@@ -513,7 +513,8 @@ module.exports = class Organization {
     else {
       const lastTx = await Storage.getLastTransaction(this.caelum.storage, certApp.subject.issued)
       const status = (issued ? 'issued' : 'revoked')
-      return await Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
+      console.log(status, lastTx, this.keys, TX_ISSUED)
+      return await Storage.transferAsset(this.caelum.storage, lastTx, this.keys.storage, TX_ISSUED, { certificateId, did, status }, this.keys.storage.publicKey)
     }
   }
 
