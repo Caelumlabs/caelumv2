@@ -69,7 +69,6 @@ module.exports = class Organization {
       axios.get(this.endpoint + 'auth/session/wait/' + sessionId)
         .then(async (result) => {
           this.sdk = new SDK(this.caelum, this.did, result.data.tokenApi, this.endpoint)
-          console.log(result.data)
           this.parameters = (result.data.capacity === 'admin') ? await this.sdk.call('parameter', 'getAll') : false
           resolve(result.data)
         })
@@ -481,7 +480,7 @@ module.exports = class Organization {
   async addCertificate (subject) {
     return new Promise((resolve, reject) => {
       const achievement = new Achievement(subject)
-      let certApp = this.certificates.find(item => item.type === TX_TAGS)
+      let certApp = this.applications.find(item => item.type === TX_TAGS)
       const promise = (certApp) ? Promise.resolve(certApp) : this.addCertificateApp()
       promise
         .then((result) => {
@@ -513,7 +512,6 @@ module.exports = class Organization {
     else {
       const lastTx = await Storage.getLastTransaction(this.caelum.storage, certApp.subject.issued)
       const status = (issued ? 'issued' : 'revoked')
-      console.log(status, lastTx, this.keys, TX_ISSUED)
       return await Storage.transferAsset(this.caelum.storage, lastTx, this.keys.storage, TX_ISSUED, { certificateId, did, status }, this.keys.storage.publicKey)
     }
   }

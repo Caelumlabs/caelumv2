@@ -14,7 +14,7 @@ const logTags = (certs) => {
 }
 
 const main = async () => {
-  const did = '5CwHB365qYuyJLZEQDiPXSDUFATf4GY43Tfco7Y153tS6xZR'
+  const did = '5DAfhMVeVezdwDuUiTWULUQB6G86KzJHFd8P8pasyDSjpwXU'
   const caelum = new Caelum(STORAGE, GOVERNANCE)
   const org = await caelum.loadOrganization(did)
   await org.loadInformation()
