@@ -33,7 +33,8 @@ const methods = {
       getAll: { action: 'get', auth: true },
       getOne: { action: 'get', auth: true },
       getIssued: { action: 'get', submethod: 'issued', auth: true },
-      revoke: { action: 'delete', submethod: 'issued', auth: true }
+      revoke: { action: 'delete', submethod: 'issued', auth: true },
+      accept: { action: 'put', submethod: 'issued', auth: true }
     }
   },
   api: {
