@@ -42,6 +42,7 @@ module.exports = {
       sphere: 'ex:personal',
       peerDid: 'ex: did:peerdid:12345',
       email: 'ex:john@smith.test',
+      certificateId: 'ex:23233223',
       currentGivenName: 'ex:John',
       currentFamilyName: 'ex:Smith',
       telephone: 'ex:5551211',

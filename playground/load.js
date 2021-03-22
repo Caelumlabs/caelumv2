@@ -19,8 +19,7 @@ const load = async (did) => {
   await pool.loadInformation()
   await pool.loadApplications()
   await pool.loadCertificates()
-  console.log(pool.applications)
-  console.log(pool.certificates)
+  console.log(pool)
 }
 
 /**

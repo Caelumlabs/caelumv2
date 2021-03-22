@@ -15,10 +15,21 @@ const main = async () => {
   // Generalitat
   const tagProximitat = org.certificates[0].certificateId
 
-  const did = '5CwHB365qYuyJLZEQDiPXSDUFATf4GY43Tfco7Y153tS6xZR'
-  await org.issueCertificate(tagProximitat, did)
-  // await org3.acceptCertificate(tagProximitat, issuer1.did)
-  log('\n' + chalk.grey('Issue Empresa : ') + chalk.cyan(did))
+  // const did = '5CwHB365qYuyJLZEQDiPXSDUFATf4GY43Tfco7Y153tS6xZR'
+  // await org.issueCertificate(tagProximitat, did)
+  // await org.acceptCertificate(tagProximitat, issuer1.did)
+  // log('\n' + chalk.grey('Issue Empresa : ') + chalk.cyan(did))
+
+    const subject = {
+      "@id": "http://me.markus-lanthaler.com/",
+      currentGivenName: 'Ferrab',
+      currentFamilyName: 'Puig',
+      email: 'alex@caelumlabs.com',
+      govId: '232323233A',
+      certificateId: '2212'
+    }
+    const vc = await org.signDid(subject)
+    console.log(vc)
 
   process.exit()
 }

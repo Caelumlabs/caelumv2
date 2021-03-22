@@ -653,7 +653,8 @@ module.exports = class Organization {
   }
 
   async signDid (subject) {
-    const result = await W3C.signCredential(subject, this.did, this.keys.w3c)
+    // const result = await W3C.signCredential(subject, this.did, this.keys.w3c)
+    const result = await W3C.signCredential(subject, this.did, this.keys.w3c, this.didDocument)
     return result
   }
 
@@ -692,7 +693,7 @@ module.exports = class Organization {
     await this.caelum.governance.transferTokensNoFees(address, amountTransfer)
 
     // assign new owner.
-    console.log('TODO : changeOwner??')
+    // console.log('TODO : changeOwner??')
     // await this.caelum.governance.changeOwner(did, address)
   }
 
