@@ -41,6 +41,7 @@ module.exports = {
       capacity: 'ex:admin',
       sphere: 'ex:personal',
       peerDid: 'ex: did:peerdid:12345',
+      did: 'ex: did:peerdid:12345',
       email: 'ex:john@smith.test',
       certificateId: 'ex:23233223',
       currentGivenName: 'ex:John',
