@@ -529,7 +529,7 @@ module.exports = class Organization {
     }
     const lastTx = await Storage.getLastTransaction(this.caelum.storage, certApp.subject.accepted)
     const status = (accepted ? 'accepted' : 'not_accepted')
-    await Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
+    await Storage.transferAsset(this.caelum.storage, lastTx, this.keys.storage, TX_ISSUED, { certificateId, did, status }, this.keys.storage.publicKey)
   }
 
   /**
