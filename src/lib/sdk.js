@@ -82,6 +82,15 @@ const methods = {
       updateStatus: { action: 'put', auth: true },
       updateConfiguration: { action: 'put', submethod: 'config', auth: true }
     }
+  },
+  organization: {
+    endpoint: 'organization',
+    methods: {
+      add: { action: 'post', auth: true },
+      update: { action: 'put', auth: true },
+      delete: { action: 'delete', auth: true },
+      getAll: { action: 'get', auth: true }
+    }
   }
 }
 
