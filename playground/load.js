@@ -1,9 +1,9 @@
 // Utils.
-const utils = require('../utils/index')
+const utils = require('./utils')
 
 // Caelum Lib.
-const Caelum = require('../../src/index')
-const Blockchain = require('../../src/utils/substrate')
+const Caelum = require('../src/index')
+const Blockchain = require('../src/utils/substrate')
 const Crypto = Caelum.loadCrypto()
 
 // Constants
@@ -17,7 +17,12 @@ const load = async (did) => {
   const caelum = new Caelum(STORAGE, GOVERNANCE)
   const pool = await caelum.loadOrganization(did)
   await pool.loadInformation()
+  await pool.loadApplications()
+  await pool.loadCertificates()
   console.log(pool)
+  const certs = await pool.searchCertificates()
+  console.log(certs)
+
 }
 
 /**

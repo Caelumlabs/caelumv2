@@ -11,6 +11,7 @@ const methods = {
   auth: {
     endpoint: 'auth',
     methods: {
+      claim: { action: 'get', submethod: 'claim', auth: true },
       notifications: { action: 'get', submethod: 'notifications', auth: true }
     }
   },
@@ -32,7 +33,8 @@ const methods = {
       getAll: { action: 'get', auth: true },
       getOne: { action: 'get', auth: true },
       getIssued: { action: 'get', submethod: 'issued', auth: true },
-      revoke: { action: 'delete', submethod: 'issued', auth: true }
+      revoke: { action: 'delete', submethod: 'issued', auth: true },
+      accept: { action: 'put', submethod: 'issued', auth: true }
     }
   },
   api: {
@@ -51,7 +53,43 @@ const methods = {
       getOneProject: { action: 'get', submethod: 'project', auth: true },
       getAllProjects: { action: 'get', submethod: 'project', auth: true },
       updateProject: { action: 'put', submethod: 'project', auth: true },
-      deleteProject: { action: 'delete', submethod: 'project', auth: true }
+      deleteProject: { action: 'delete', submethod: 'project', auth: true },
+      addWorkflow: { action: 'post', submethod: 'workflow', auth: true },
+      getOneWorkflow: { action: 'get', submethod: 'workflow', auth: true },
+      getAllWorkflows: { action: 'get', submethod: 'workflow', auth: true },
+      updateWorkflow: { action: 'put', submethod: 'workflow', auth: true },
+      deleteWorkflow: { action: 'delete', submethod: 'workflow', auth: true },
+      saveDraft: { action: 'put', submethod: 'workflow/draft', auth: true },
+      deploy: { action: 'put', submethod: 'workflow/deploy', auth: true },
+      getStatesAll: { action: 'get', submethod: 'workflow/state', auth: true },
+      getStatesOne: { action: 'get', submethod: 'workflow/state', auth: true }
+    }
+  },
+  workflow: {
+    endpoint: 'workflow',
+    methods: {
+      set: { action: 'post', submethod: 'set', auth: false },
+      upload: { action: 'form', submethod: 'upload', auth: false },
+      download: { action: 'get', submethod: 'download', auth: false },
+      approve: { action: 'post', submethod: 'approve', auth: false }
+    }
+  },
+  plugin: {
+    endpoint: 'plugin',
+    methods: {
+      getAll: { action: 'get', auth: true },
+      getOne: { action: 'get', auth: true },
+      updateStatus: { action: 'put', auth: true },
+      updateConfiguration: { action: 'put', submethod: 'config', auth: true }
+    }
+  },
+  organization: {
+    endpoint: 'organization',
+    methods: {
+      add: { action: 'post', auth: true },
+      update: { action: 'put', auth: true },
+      delete: { action: 'delete', auth: true },
+      getAll: { action: 'get', auth: true }
     }
   }
 }
@@ -80,14 +118,14 @@ module.exports = class SDK {
         const headers = method.auth ? { headers: { Authorization: `Bearer ${this.tokenApi}` } } : {}
         const params = extra.params || []
         const data = extra.data || {}
+        const form = extra.form || {}
 
         // Build endpooint.
         endpoint = this.endpoint + methods[api].endpoint
         if (method.submethod) endpoint += '/' + method.submethod
-
         for (let i = 0; i < params.length; i++) endpoint += '/' + params[i]
+        // console.log(method.action + ' ' + endpoint)
         // API Method : GET, POST, PUT,  DELETE
-        console.log(method.action + ' ' + endpoint)
         switch (method.action) {
           case 'get' :
             promise = axios.get(endpoint, headers)
@@ -100,6 +138,9 @@ module.exports = class SDK {
             break
           case 'put':
             promise = axios.put(endpoint, data, headers)
+            break
+          case 'form':
+            promise = axios.post(endpoint, form, { headers: form.getHeaders() })
             break
         }
         promise

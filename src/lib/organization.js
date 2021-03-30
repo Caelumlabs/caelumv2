@@ -69,15 +69,17 @@ module.exports = class Organization {
       axios.get(this.endpoint + 'auth/session/wait/' + sessionId)
         .then(async (result) => {
           this.sdk = new SDK(this.caelum, this.did, result.data.tokenApi, this.endpoint)
-          if (result.data.isAdmin) {
-            this.parameters = await this.sdk.getParameters()
-          }
+          this.parameters = (result.data.capacity === 'admin') ? await this.sdk.call('parameter', 'getAll') : false
           resolve(result.data)
         })
         .catch(() => {
           resolve(false)
         })
     })
+  }
+
+  async startSdk () {
+    this.sdk = new SDK(this.caelum, this.did, '', this.endpoint, 'peerdid')
   }
 
   async setSession (tokenApi, capacity) {
@@ -108,7 +110,6 @@ module.exports = class Organization {
       const app = new Application()
       app.setSubject(subject.name, subject.type)
         .then(() => {
-          console.log(this.caelum)
           return Storage.createApp(this.caelum.storage, this.keys.storage, subject)
         })
         .then(txId => {
@@ -479,18 +480,16 @@ module.exports = class Organization {
   async addCertificate (subject) {
     return new Promise((resolve, reject) => {
       const achievement = new Achievement(subject)
-      let certApp = this.certificates.find(item => item.type === TX_TAGS)
+      let certApp = this.applications.find(item => item.type === TX_TAGS)
       const promise = (certApp) ? Promise.resolve(certApp) : this.addCertificateApp()
       promise
         .then((result) => {
           certApp = result
-          console.log(certApp)
           const certsTxId = certApp.subject.certificates
           return Storage.getLastTransaction(this.caelum.storage, certsTxId)
         })
         .then((result) => {
           const lastAppTx = result
-          console.log(lastAppTx)
           return Storage.transferAsset(this.caelum.storage, lastAppTx, this.keys.storage, TX_TAG_TYPE, achievement.subject, this.keys.storage.publicKey)
         })
         .then((result) => {
@@ -513,7 +512,7 @@ module.exports = class Organization {
     else {
       const lastTx = await Storage.getLastTransaction(this.caelum.storage, certApp.subject.issued)
       const status = (issued ? 'issued' : 'revoked')
-      return await Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
+      return await Storage.transferAsset(this.caelum.storage, lastTx, this.keys.storage, TX_ISSUED, { certificateId, did, status }, this.keys.storage.publicKey)
     }
   }
 
@@ -530,7 +529,7 @@ module.exports = class Organization {
     }
     const lastTx = await Storage.getLastTransaction(this.caelum.storage, certApp.subject.accepted)
     const status = (accepted ? 'accepted' : 'not_accepted')
-    await Storage.transferAsset(this.caelum.storage, lastTx, this.keys, TX_ISSUED, { certificateId, did, status }, this.keys.publicKey)
+    await Storage.transferAsset(this.caelum.storage, lastTx, this.keys.storage, TX_ISSUED, { certificateId, did, status }, this.keys.storage.publicKey)
   }
 
   /**
@@ -654,7 +653,8 @@ module.exports = class Organization {
   }
 
   async signDid (subject) {
-    const result = await W3C.signCredential(subject, this.did, this.keys.w3c)
+    // const result = await W3C.signCredential(subject, this.did, this.keys.w3c)
+    const result = await W3C.signCredential(subject, this.did, this.keys.w3c, this.didDocument)
     return result
   }
 
@@ -693,9 +693,8 @@ module.exports = class Organization {
     await this.caelum.governance.transferTokensNoFees(address, amountTransfer)
 
     // assign new owner.
-    console.log('Register 4')
+    // console.log('TODO : changeOwner??')
     // await this.caelum.governance.changeOwner(did, address)
-    console.log('Register 5')
   }
 
   getWorkflow (workflowId, stateId = 0, partyId = 1, actionId = 1) {

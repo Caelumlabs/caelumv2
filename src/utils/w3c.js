@@ -45,7 +45,7 @@ module.exports = class W3C {
         'https://www.w3.org/2018/credentials/v1',
         'https://web.tabit.caelumapp.com/context/v1'
       ],
-      type: ['VerifiableCredential', 'Did'],
+      type: ['VerifiableCredential'],
       issuer: 'did:caelum:' + issuer,
       issuanceDate: new Date().toISOString(),
       credentialSubject: subject
