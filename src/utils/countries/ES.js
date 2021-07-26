@@ -5,65 +5,65 @@
 
 const sanitize = function (taxID) {
   // Ensure uppercase and remove whitespace ang hyphens
-  return taxID.toUpperCase().replace(/\s/g, '').replace(/-/g, '')
-}
+  return taxID.toUpperCase().replace(/\s/g, '').replace(/-/g, '');
+};
 
 module.exports = {
   isTaxID: (taxID) => {
-    taxID = sanitize(taxID)
+    taxID = sanitize(taxID);
     if (!taxID || taxID.length !== 9) {
-      return false
+      return false;
     }
 
-    const letters = ['J', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
-    const digits = taxID.substr(1, taxID.length - 2)
-    const letter = taxID.substr(0, 1)
-    const control = taxID.substr(taxID.length - 1)
-    let sum = 0
-    let i
-    let digit
+    const letters = ['J', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+    const digits = taxID.substr(1, taxID.length - 2);
+    const letter = taxID.substr(0, 1);
+    const control = taxID.substr(taxID.length - 1);
+    let sum = 0;
+    let i;
+    let digit;
 
     if (!letter.match(/[A-Z]/)) {
-      return false
+      return false;
     }
 
     for (i = 0; i < digits.length; ++i) {
-      digit = parseInt(digits[i])
+      digit = parseInt(digits[i]);
 
       if (isNaN(digit)) {
-        return false
+        return false;
       }
 
       if (i % 2 === 0) {
-        digit *= 2
+        digit *= 2;
         if (digit > 9) {
-          digit = parseInt(digit / 10) + (digit % 10)
+          digit = parseInt(digit / 10) + (digit % 10);
         }
 
-        sum += digit
+        sum += digit;
       } else {
-        sum += digit
+        sum += digit;
       }
     }
 
-    sum %= 10
+    sum %= 10;
     if (sum !== 0) {
-      digit = 10 - sum
+      digit = 10 - sum;
     } else {
-      digit = sum
+      digit = sum;
     }
 
-    let isValid = false
+    let isValid = false;
     if (letter.match(/[ABEH]/)) {
-      isValid = String(digit) === control
+      isValid = String(digit) === control;
     }
     if (letter.match(/[NPQRSW]/)) {
-      isValid = letters[digit] === control
+      isValid = letters[digit] === control;
     } else {
-      isValid = (String(digit) === control || letters[digit] === control)
+      isValid = (String(digit) === control || letters[digit] === control);
     }
     if (!isValid) {
-      throw (new Error('Invalid taxID'))
-    } else return true
-  }
-}
+      throw (new Error('Invalid taxID'));
+    } else return true;
+  },
+};

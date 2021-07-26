@@ -1,4 +1,3 @@
-'use strict'
 /**
  * Schema.org: Action.
  */
@@ -8,9 +7,9 @@ module.exports = class Achievement {
    *
    * @param {string} subject of the achievement
    */
-  constructor (subject = false) {
-    this.subject = (subject !== false) ? subject : {}
-    this.subject['@type'] = 'Achievement'
+  constructor(subject = false) {
+    this.subject = (subject !== false) ? subject : {};
+    this.subject['@type'] = 'Achievement';
   }
 
   /**
@@ -18,8 +17,8 @@ module.exports = class Achievement {
    *
    * @param {string} title of the achievement
    */
-  title (title) {
-    this.subject.title = title
+  title(title) {
+    this.subject.title = title;
   }
 
   /**
@@ -27,8 +26,8 @@ module.exports = class Achievement {
    *
    * @param {string} description Full Name in ine string
    */
-  description (description) {
-    this.subject.description = description
+  description(description) {
+    this.subject.description = description;
   }
 
   /**
@@ -36,8 +35,8 @@ module.exports = class Achievement {
    *
    * @param {string} url URL of the Achievement
    */
-  url (url) {
-    this.subject.url = url
+  url(url) {
+    this.subject.url = url;
   }
 
   /**
@@ -45,8 +44,8 @@ module.exports = class Achievement {
    *
    * @param {string} did of issuer
    */
-  issuer (did) {
-    this.subject.issuer = did
+  issuer(did) {
+    this.subject.issuer = did;
   }
 
   /**
@@ -54,8 +53,8 @@ module.exports = class Achievement {
    *
    * @param {object} location Location Object
    */
-  location (location) {
-    this.subject.location = location.subject
+  location(location) {
+    this.subject.location = location.subject;
   }
 
   /**
@@ -63,8 +62,8 @@ module.exports = class Achievement {
    *
    * @param {*} agent Person/Organization Object
    */
-  agent (agent) {
-    this.subject.agent = agent.subject
+  agent(agent) {
+    this.subject.agent = agent.subject;
   }
 
   /**
@@ -72,8 +71,8 @@ module.exports = class Achievement {
    *
    * @param {*} issuanceDate of the achievement
    */
-  issuanceDate (issuanceDate) {
-    this.subject.issuanceDate = issuanceDate
+  issuanceDate(issuanceDate) {
+    this.subject.issuanceDate = issuanceDate;
   }
 
   /**
@@ -81,8 +80,8 @@ module.exports = class Achievement {
    *
    * @param {string} expirationDate of the achievement
    */
-  expirationDate (expirationDate) {
-    this.subject.expirationDate = expirationDate
+  expirationDate(expirationDate) {
+    this.subject.expirationDate = expirationDate;
   }
 
   /**
@@ -90,10 +89,10 @@ module.exports = class Achievement {
    *
    * @param {string} learningAchievement title to set
    */
-  learningAchievement (learningAchievement) {
+  learningAchievement(learningAchievement) {
     this.subject.learningAchievement = {
-      title: learningAchievement
-    }
+      title: learningAchievement,
+    };
   }
 
   /**
@@ -101,10 +100,10 @@ module.exports = class Achievement {
    *
    * @param {string} course identifier
    */
-  course (course) {
+  course(course) {
     this.subject.course = {
-      id: course
-    }
+      id: course,
+    };
   }
 
   /**
@@ -114,7 +113,7 @@ module.exports = class Achievement {
    * @param {object} signer Key Pair
    * @returns {object} Signed credential
    */
-  sign (signer, issuer) {
+  sign(signer, issuer) {
     // return signCredential(this.subject, signer, issuer)
   }
-}
+};

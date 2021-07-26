@@ -1,37 +1,25 @@
-// Utils.
-const utils = require('./utils')
-
-// Caelum Lib.
-const Caelum = require('../src/index')
-const Blockchain = require('../src/utils/substrate')
-const Crypto = Caelum.loadCrypto()
-
-// Constants
-const GOVERNANCE = 'wss://substrate.tabit.caelumapp.com'
-const STORAGE = 'https://api.bigchaindb.caelumapp.com/api/v1/'
-
+const GOVERNANCE = 'ws://127.0.0.1:9944';
+const debug = require('debug')('did:debug:load');
+const Caelum = require('../src/index');
 
 // Main function.
 const load = async (did) => {
-  // Connect Caelum-SDK & Create a new Root Organization. Governanace Level 0
-  const caelum = new Caelum(STORAGE, GOVERNANCE)
-  const pool = await caelum.loadOrganization(did)
-  await pool.loadInformation()
-  await pool.loadApplications()
-  await pool.loadCertificates()
-  console.log(pool)
-  const certs = await pool.searchCertificates()
-  console.log(certs)
+  const caelum = new Caelum(GOVERNANCE);
+  await caelum.connect();
 
-}
+  debug(`Get Info ${did}`);
+  const org = await caelum.getOrganizationFromDid(did);
+  debug(`Org = ${org.data.legal_name}`);
 
-/**
+  // Disconnect.
+  await caelum.disconnect();
+};
+
+/*
 * Main
-**/
+*/
 const main = async () => {
-  utils.start()
-  const did = await utils.ask('Did')
-  await load(did)
-  utils.end()
-}
-main()
+  await load(process.argv[2]);
+};
+
+main();

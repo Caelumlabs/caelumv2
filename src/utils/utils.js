@@ -29,6 +29,28 @@ class Utils {
     const buffer = Buffer.from(str, 'utf8');
     return Array.prototype.slice.call(buffer, 0);
   }
+
+  /**
+   * Verify correct hex string
+   *
+   * @param {string} str source
+   * @returns {bool} True if string is correct
+   */
+  static verifyHexString(str) {
+    let pattern = null;
+    if (str.slice(0, 2) === '0X') {
+      pattern = /[A-F0-9]/gi;
+    } else if (str.slice(0, 2) === '0x') {
+      pattern = /[a-f0-9]/gi;
+    } else {
+      return false;
+    }
+    const result = str.slice(2).match(pattern);
+    if (result.length !== str.length - 2) {
+      return false;
+    }
+    return true;
+  }
 }
 
 module.exports = Utils;
