@@ -1,10 +1,10 @@
 /* eslint-disable no-async-promise-executor */
-
-const Utils = require('./utils');
-const { bufferToU8a } = require('@polkadot/util');
+'use strict'
+const Utils = require('./utils')
+const { bufferToU8a } = require('@polkadot/util')
 
 // Debug
-const debug = require('debug')('did:debug:sub');
+var debug = require('debug')('did:debug:sub')
 /**
  * Functions dealing with receipes and processes.
  */
@@ -22,12 +22,12 @@ module.exports = class Process {
    * @param {string} hash Process node hash
    * @returns {Promise} of transaction
    */
-  async startProcess(exec, keypair, did, hash) {
+  async startProcess (exec, keypair, did, hash) {
     // Convert hash string to hex
-    const hexHash = Utils.base64ToHex(hash);
+    const hexHash = Utils.base64ToHex(hash)
     // Convert did string to hex
-    const transaction = await exec.api.tx.idSpace.startProcess(hexHash, did);
-    return await exec.execTransaction(keypair, transaction);
+    const transaction = await exec.api.tx.idSpace.startProcess(hexHash, did)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -44,13 +44,13 @@ module.exports = class Process {
    * @param {string} parentHash Has of the parent Process or SubProcess
    * @returns {Promise} of transaction
    */
-  async startSubprocess(exec, keypair, did, hash, parentHash) {
+  async startSubprocess (exec, keypair, did, hash, parentHash) {
     // Convert hash string to hex
-    const hexHash = Utils.base64ToHex(hash);
+    const hexHash = Utils.base64ToHex(hash)
     // Convert hash string to hex
-    const parentHexHash = Utils.base64ToHex(parentHash);
-    const transaction = await exec.api.tx.idSpace.startSubprocess(hexHash, did, parentHexHash);
-    return await exec.execTransaction(keypair, transaction);
+    const parentHexHash = Utils.base64ToHex(parentHash)
+    const transaction = await exec.api.tx.idSpace.startSubprocess(hexHash, did, parentHexHash)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -67,13 +67,13 @@ module.exports = class Process {
    * @param {string} parentHash Has of the parent Process or SubProcess
    * @returns {Promise} of transaction
    */
-  async startStep(exec, keypair, did, hash, parentHash) {
+  async startStep (exec, keypair, did, hash, parentHash) {
     // Convert hash string to hex
-    const hexHash = Utils.base64ToHex(hash);
+    const hexHash = Utils.base64ToHex(hash)
     // Convert hash string to hex
-    const parentHexHash = Utils.base64ToHex(parentHash);
-    const transaction = await exec.api.tx.idSpace.startStep(hexHash, did, parentHexHash);
-    return await exec.execTransaction(keypair, transaction);
+    const parentHexHash = Utils.base64ToHex(parentHash)
+    const transaction = await exec.api.tx.idSpace.startStep(hexHash, did, parentHexHash)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -90,13 +90,13 @@ module.exports = class Process {
    * @param {string} parentHash Has of the parent Process or SubProcess
    * @returns {Promise} of transaction
    */
-  async addDocument(exec, keypair, did, hash, parentHash) {
+  async addDocument (exec, keypair, did, hash, parentHash) {
     // Convert hash string to hex
-    const hexHash = Utils.base64ToHex(hash);
+    const hexHash = Utils.base64ToHex(hash)
     // Convert hash string to hex
-    const parentHexHash = Utils.base64ToHex(parentHash);
-    const transaction = await exec.api.tx.idSpace.addDocument(hexHash, did, parentHexHash);
-    return await exec.execTransaction(keypair, transaction);
+    const parentHexHash = Utils.base64ToHex(parentHash)
+    const transaction = await exec.api.tx.idSpace.addDocument(hexHash, did, parentHexHash)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -113,13 +113,13 @@ module.exports = class Process {
    * @param {string} parentHash Has of the parent Process or SubProcess
    * @returns {Promise} of transaction
    */
-  async addAttachment(exec, keypair, did, hash, parentHash) {
+  async addAttachment (exec, keypair, did, hash, parentHash) {
     // Convert hash string to hex
-    const hexHash = Utils.base64ToHex(hash);
+    const hexHash = Utils.base64ToHex(hash)
     // Convert hash string to hex
-    const parentHexHash = Utils.base64ToHex(parentHash);
-    const transaction = await exec.api.tx.idSpace.addAttachment(hexHash, did, parentHexHash);
-    return await exec.execTransaction(keypair, transaction);
+    const parentHexHash = Utils.base64ToHex(parentHash)
+    const transaction = await exec.api.tx.idSpace.addAttachment(hexHash, did, parentHexHash)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -131,9 +131,9 @@ module.exports = class Process {
    * @param {number} cost Cost to be burned by process node
    * @returns {Promise} of transaction
    */
-  async setTokenAndCostForProcess(exec, keypair, tokenid, cost) {
-    const transaction = await exec.api.tx.idSpace.setTokenAndCostForProcess(tokenid, cost);
-    return await exec.execTransaction(keypair, transaction);
+  async setTokenAndCostForProcess (exec, keypair, tokenid, cost) {
+    const transaction = await exec.api.tx.idSpace.setTokenAndCostForProcess(tokenid, cost)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -148,11 +148,11 @@ module.exports = class Process {
    * @param {string} hash Process node hash
    * @returns {Promise} of transaction
    */
-  async revoke(exec, keypair, hash) {
+  async revoke (exec, keypair, hash) {
     // Convert hash string to hex
-    const hexHash = Utils.base64ToHex(hash);
-    const transaction = await exec.api.tx.idSpace.revoke(hexHash);
-    return await exec.execTransaction(keypair, transaction);
+    const hexHash = Utils.base64ToHex(hash)
+    const transaction = await exec.api.tx.idSpace.revoke(hexHash)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -163,15 +163,15 @@ module.exports = class Process {
    * @param {string} hash Process node hash
    * @returns {Promise} of transaction
    */
-  async pathTo(exec, keypair, hash) {
+  async pathTo (exec, keypair, hash) {
     // Convert hash string to hex
-    const hexHash = Utils.base64ToHex(hash);
-    const transaction = await exec.api.tx.idSpace.pathTo(hexHash);
-    await exec.execTransaction(keypair, transaction);
-    const pathEvent = await exec.wait4Event('ProcessPath');
-    const path = [];
-    pathEvent[1].split('x')[1].match(/.{1,2}/g).forEach((el) => path.push(String.fromCharCode(parseInt(el, 16))));
-    return JSON.parse(path.join(''));
+    const hexHash = Utils.base64ToHex(hash)
+    const transaction = await exec.api.tx.idSpace.pathTo(hexHash)
+    await exec.execTransaction(keypair, transaction)
+    const pathEvent = await exec.wait4Event('ProcessPath')
+    let path = []
+    pathEvent[1].split('x')[1].match(/.{1,2}/g).forEach(el => path.push(String.fromCharCode(parseInt(el, 16))))
+    return JSON.parse(path.join(''))
   }
 
   /**
@@ -182,15 +182,15 @@ module.exports = class Process {
    * @param {string} hash Process node hash
    * @returns {Promise} of transaction
    */
-  async getFullProcessTree(exec, keypair, hash) {
+  async getFullProcessTree (exec, keypair, hash) {
     // Convert hash string to hex
-    const hexHash = Utils.base64ToHex(hash);
-    const transaction = await exec.api.tx.idSpace.getFullProcessTree(hexHash);
-    await exec.execTransaction(keypair, transaction);
-    const pathEvent = await exec.wait4Event('ProcessPath');
-    const path = [];
-    pathEvent[1].split('x')[1].match(/.{1,2}/g).forEach((el) => path.push(String.fromCharCode(parseInt(el, 16))));
-    return JSON.parse(path.join(''));
+    const hexHash = Utils.base64ToHex(hash)
+    const transaction = await exec.api.tx.idSpace.getFullProcessTree(hexHash)
+    await exec.execTransaction(keypair, transaction)
+    const pathEvent = await exec.wait4Event('ProcessPath')
+    let path = []
+    pathEvent[1].split('x')[1].match(/.{1,2}/g).forEach(el => path.push(String.fromCharCode(parseInt(el, 16))))
+    return JSON.parse(path.join(''))
   }
 
   /**
@@ -202,17 +202,7 @@ module.exports = class Process {
    */
   async getProcessNode(exec, hash) {
     // Convert hash string to hex
-    const hexHash = Utils.base64ToHex(hash);
-    return await exec.api.query.idSpace.processTree(hexHash);
+    const hexHash = Utils.base64ToHex(hash)
+    return await exec.api.query.idSpace.processTree(hexHash)
   }
-
-  /**
-   * Get the Token id and cost of process data
-   *
-   * @param {object} exec Executor class.
-   * @returns {Promise} of transaction
-   */
-  async getTokenIdAndCostProcessData(exec) {
-    return await exec.api.query.idSpace.tokenAndCostForProcess();
-  }
-};
+}

@@ -1,11 +1,11 @@
 /* eslint-disable no-async-promise-executor */
-
-const Utils = require('./utils');
-const { bufferToU8a } = require('@polkadot/util');
-const util = require('util');
+'use strict'
+const Utils = require('./utils')
+const { bufferToU8a } = require('@polkadot/util')
+const util = require('util')
 
 // Debug
-const debug = require('debug')('did:debug:sub');
+var debug = require('debug')('did:debug:sub')
 /**
  * Functions dealing with token management.
  */
@@ -19,35 +19,20 @@ module.exports = class Token {
    * Parameters:
    * - `id`: The identifier of the new token. This must not be currently in use to identify an existing token.
    * - `admin`: The admin of this class of tokens. The admin is the initial address of each member of the token class's admin team.
-   * - `minBalance`: The minimum balance of this new token that any single account must have.
+   * - `minBalance`: The minimum balance of this new token that any single account must have. 
    *    If an account's balance is reduced below this, then it collapses to zero.
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the new token.
-   * @param {object} admin The admin of this class of tokens.
+   * @param {number} id The identifier of the new token. 
+   * @param {object} admin The admin of this class of tokens. 
    * @param {number} minBalance The minimum balance.
    * @returns {Promise} of transaction
    */
-  // async createNewToken (exec, keypair, id, admin, minBalance) {
-  //   console.log(id, ' - ', admin, ' - ', minBalance)
-  //   const transaction = await exec.api.tx.assets.createNewToken(id, minBalance)
-  //   return await exec.execTransaction(keypair, transaction)
-  // }
 
-  async createToken(exec, keypair, id, admin, minBalance) {
-    const transaction = await exec.api.tx.assets.create(id, admin, minBalance, true);
-    return await exec.execTransaction(keypair, transaction);
-  }
-
-  async createNewToken(exec, keypair, id, admin, minBalance) {
-    const transaction = await exec.api.tx.assets.create(id, admin, minBalance);
-    const result = await exec.execTransaction(keypair, transaction);
-    if (result == true) {
-      const trx = await exec.api.tx.assets.forceAssetStatus(id, admin, admin, admin, admin, minBalance, true, false);
-      return await exec.execTransaction(keypair, trx);
-    }
-    return false;
+  async createToken (exec, keypair, id, admin, minBalance) {
+    const transaction = await exec.api.tx.assets.create(id, admin, minBalance, true)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -57,24 +42,24 @@ module.exports = class Token {
    * Unlike `create`, no funds are reserved.
    *
    * - `id`: The identifier of the new token. This must not be currently in use to identify an existing token.
-   * - `owner`: The owner of this class of tokens. The owner has full superuser permissions over this token,
+   * - `owner`: The owner of this class of tokens. The owner has full superuser permissions over this token, 
    *    but may later change and configure the permissions using `transfer_ownership`and `set_team`.
    * - `isSufficient`: Controls that the account should have sufficient tokens free.
-   * - `minBalance`: The minimum balance of this new token that any single account must have.
+   * - `minBalance`: The minimum balance of this new token that any single account must have. 
    *    If an account's balance is reduced below this, then it collapses to zero.
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the new token.
-   * @param {object} owner The owner of this class of tokens.
-   * @param {bool} isSufficient Controls that the account should have sufficient tokens free.
+   * @param {number} id The identifier of the new token. 
+   * @param {object} owner The owner of this class of tokens. 
+   * @param {bool} isSufficient Controls that the account should have sufficient tokens free. 
    * @param {number} minBalance The minimum balance.
    * @returns {Promise} of transaction
    */
-  async forceCreateToken(exec, keypair, id, owner, isSufficient, minBalance) {
-    const transaction = await exec.api.tx.assets.forceCreate(id, owner, isSufficient, minBalance);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async forceCreateToken (exec, keypair, id, owner, isSufficient, minBalance) {
+    const transaction = await exec.api.tx.assets.forceCreate(id, owner, isSufficient, minBalance)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Destroy a class of fungible tokens.
@@ -87,14 +72,14 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} witness The identifier of the token to be destroyed..
+   * @param {number} id The identifier of the token. 
+   * @param {object} witness The identifier of the token to be destroyed.. 
    * @returns {Promise} of transaction
    */
-  async destroyToken(exec, keypair, id, witness) {
-    const transaction = await exec.api.tx.assets.destroy(id, witness);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async destroyToken (exec, keypair, id, witness) {
+    const transaction = await exec.api.tx.assets.destroy(id, witness)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Mint tokens of a particular class.
@@ -105,15 +90,15 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} beneficiary The account to be credited with the minted tokenss.
-   * @param {number} amount The amount of the token to be minted.
+   * @param {number} id The identifier of the token. 
+   * @param {object} beneficiary The account to be credited with the minted tokenss. 
+   * @param {number} amount The amount of the token to be minted. 
    * @returns {Promise} of transaction
    */
-  async mintToken(exec, keypair, id, beneficiary, amount) {
-    const transaction = await exec.api.tx.assets.mint(id, beneficiary, amount);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async mintToken (exec, keypair, id, beneficiary, amount) {
+    const transaction = await exec.api.tx.assets.mint(id, beneficiary, amount)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Reduce the balance of `who` by as much as possible up to `amount` tokens of `id`.
@@ -128,15 +113,15 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} who The account to be debited from.
-   * @param {number} amount The maximum amount by which `who`'s balance should be reduced.
+   * @param {number} id The identifier of the token. 
+   * @param {object} who The account to be debited from. 
+   * @param {number} amount The maximum amount by which `who`'s balance should be reduced. 
    * @returns {Promise} of transaction
    */
-  async burnToken(exec, keypair, id, who, amount) {
-    const transaction = await exec.api.tx.assets.burn(id, who, amount);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async burnToken (exec, keypair, id, who, amount) {
+    const transaction = await exec.api.tx.assets.burn(id, who, amount)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Move some tokens from the sender account to another.
@@ -153,22 +138,22 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} target The account to be credited.
-   * @param {number} amount The amount by which the sender's balance of tokens should be reduced.
+   * @param {number} id The identifier of the token. 
+   * @param {object} target The account to be credited. 
+   * @param {number} amount The amount by which the sender's balance of tokens should be reduced. 
    * @returns {Promise} of transaction
    */
-  async transferToken(exec, keypair, id, target, amount) {
-    const transaction = await exec.api.tx.assets.transfer(id, target, amount);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async transferToken (exec, keypair, id, target, amount) {
+    const transaction = await exec.api.tx.assets.transfer(id, target, amount)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Move some tokens from the sender account to another, keeping the sender account alive.
    *
    * - `id`: The identifier of the token to have some amount transferred.
    * - `target`: The account to be credited.
-   * - `amount`: The amount by which the sender's balance of tokens should be reduced
+   * - `amount`: The amount by which the sender's balance of tokens should be reduced 
    * - `target`'s balance increased. The amount actually transferred may be slightly greater in
    *    the case that the transfer would otherwise take the sender balance above zero but below
    *    the minimum balance. Must be greater than zero.
@@ -177,15 +162,15 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} target The amount actually transferred may be slightly greater.
-   * @param {number} amount The amount actually transferred.
+   * @param {number} id The identifier of the token. 
+   * @param {object} target The amount actually transferred may be slightly greater. 
+   * @param {number} amount The amount actually transferred. 
    * @returns {Promise} of transaction
    */
-  async transferTokenKeepAlive(exec, keypair, id, target, amount) {
-    const transaction = await exec.api.tx.assets.transferKeepAlive(id, target, amount);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async transferTokenKeepAlive (exec, keypair, id, target, amount) {
+    const transaction = await exec.api.tx.assets.transferKeepAlive(id, target, amount)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Move some tokens from one account to another.
@@ -203,16 +188,16 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} source The account to be debited.
-   * @param {object} dest The account to be credited.
-   * @param {number} amount The amount by which the `source`'s balance of tokens should be reduced.
+   * @param {number} id The identifier of the token. 
+   * @param {object} source The account to be debited. 
+   * @param {object} dest The account to be credited. 
+   * @param {number} amount The amount by which the `source`'s balance of tokens should be reduced. 
    * @returns {Promise} of transaction
    */
-  async forceTransferToken(exec, keypair, id, source, dest, amount) {
-    const transaction = await exec.api.tx.assets.forceTransfer(id, source, dest, amount);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async forceTransferToken (exec, keypair, id, source, dest, amount) {
+    const transaction = await exec.api.tx.assets.forceTransfer(id, source, dest, amount)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Disallow further unprivileged transfers from an account.
@@ -223,14 +208,14 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {string} who The account to be frozen.
+   * @param {number} id The identifier of the token. 
+   * @param {string} who The account to be frozen. 
    * @returns {Promise} of transaction
    */
-  async freezeAccountForToken(exec, keypair, id, who) {
-    const transaction = await exec.api.tx.assets.freeze(id, who);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async freezeAccountForToken (exec, keypair, id, who) {
+    const transaction = await exec.api.tx.assets.freeze(id, who)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Allow unprivileged transfers from an account again.
@@ -241,14 +226,14 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} who The account to be unfrozen.
+   * @param {number} id The identifier of the token. 
+   * @param {object} who The account to be unfrozen. 
    * @returns {Promise} of transaction
    */
-  async unfrozenAccountForToken(exec, keypair, id, who) {
-    const transaction = await exec.api.tx.assets.thaw(id, who);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async unfrozenAccountForToken (exec, keypair, id, who) {
+    const transaction = await exec.api.tx.assets.thaw(id, who)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Disallow further unprivileged transfers for the token class.
@@ -258,13 +243,13 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
+   * @param {number} id The identifier of the token. 
    * @returns {Promise} of transaction
    */
-  async freezeToken(exec, keypair, id) {
-    const transaction = await exec.api.tx.assets.freezeToken(id);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async freezeToken (exec, keypair, id) {
+    const transaction = await exec.api.tx.assets.freezeToken(id)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Allow unprivileged transfers for the token again.
@@ -274,13 +259,13 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
+   * @param {number} id The identifier of the token. 
    * @returns {Promise} of transaction
    */
-  async unfrozenToken(exec, keypair, id) {
-    const transaction = await exec.api.tx.assets.thawToken(id);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async unfrozenToken (exec, keypair, id) {
+    const transaction = await exec.api.tx.assets.thawToken(id)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Change the Owner of a token.
@@ -291,14 +276,14 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} owner The new Owner of this token.
+   * @param {number} id The identifier of the token. 
+   * @param {object} owner The new Owner of this token. 
    * @returns {Promise} of transaction
    */
-  async transferTokenOwnership(exec, keypair, id, owner) {
-    const transaction = await exec.api.tx.assets.transferOwnership(id, owner);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async transferTokenOwnership (exec, keypair, id, owner) {
+    const transaction = await exec.api.tx.assets.transferOwnership(id, owner)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Change the Issuer, Admin and Freezer of a token.
@@ -311,16 +296,16 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} issuer The new Issuer of this token.
-   * @param {object} admin The new Admin of this token.
-   * @param {object} freezer The new Freezer of this toke.
+   * @param {number} id The identifier of the token. 
+   * @param {object} issuer The new Issuer of this token. 
+   * @param {object} admin The new Admin of this token. 
+   * @param {object} freezer The new Freezer of this toke. 
    * @returns {Promise} of transaction
    */
-  async setTokenTeam(exec, keypair, id, issuer, admin, freezer) {
-    const transaction = await exec.api.tx.assets.setTeam(id, issuer, admin, freezer);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async setTokenTeam (exec, keypair, id, issuer, admin, freezer) {
+    const transaction = await exec.api.tx.assets.setTeam(id, issuer, admin, freezer)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Set the metadata for a token.
@@ -337,16 +322,16 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {string} name The user friendly name of this token. Limited in length by `StringLimit.
-   * @param {string} symbol The exchange symbol for this token. Limited in length by `StringLimit`n.
-   * @param {number} decimals The number of decimals this token uses to represent one unit.
+   * @param {number} id The identifier of the token. 
+   * @param {string} name The user friendly name of this token. Limited in length by `StringLimit. 
+   * @param {string} symbol The exchange symbol for this token. Limited in length by `StringLimit`n. 
+   * @param {number} decimals The number of decimals this token uses to represent one unit. 
    * @returns {Promise} of transaction
    */
-  async setTokenMetadata(exec, keypair, id, name, symbol, decimals) {
-    const transaction = await exec.api.tx.assets.setMetadata(id, name, symbol, decimals);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async setTokenMetadata (exec, keypair, id, name, symbol, decimals) {
+    const transaction = await exec.api.tx.assets.setMetadata(id, name, symbol, decimals)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Clear the metadata for a token.
@@ -358,13 +343,13 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
+   * @param {number} id The identifier of the token. 
    * @returns {Promise} of transaction
    */
-  async clearTokenMetadata(exec, keypair, id) {
-    const transaction = await exec.api.tx.assets.clearMetadata(id);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async clearTokenMetadata (exec, keypair, id) {
+    const transaction = await exec.api.tx.assets.clearMetadata(id)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Force the metadata for a token to some value.
@@ -378,17 +363,17 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {atring} name The user friendly name of this token. Limited in length by `StringLimit`.
-   * @param {string} symbol The exchange symbol for this token. Limited in length by `StringLimit`.
-   * @param {number} decimals The number of decimals this token uses to represent one unit.
-   * @param {bool} isFrozen The identifier of the token.
+   * @param {number} id The identifier of the token. 
+   * @param {atring} name The user friendly name of this token. Limited in length by `StringLimit`. 
+   * @param {string} symbol The exchange symbol for this token. Limited in length by `StringLimit`. 
+   * @param {number} decimals The number of decimals this token uses to represent one unit. 
+   * @param {bool} isFrozen The identifier of the token. 
    * @returns {Promise} of transaction
    */
-  async forceSetTokenMetadata(exec, keypair, id, name, symbol, decimals, isFrozen) {
-    const transaction = await exec.api.tx.assets.forceSetMetadata(id, name, symbol, decimals, isFrozen);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async forceSetTokenMetadata (exec, keypair, id, name, symbol, decimals, isFrozen) {
+    const transaction = await exec.api.tx.assets.forceSetMetadata(id, name, symbol, decimals, isFrozen)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Clear the metadata for a token.
@@ -399,13 +384,13 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
+   * @param {number} id The identifier of the token. 
    * @returns {Promise} of transaction
    */
-  async forceClearTokenMetadata(exec, keypair, id) {
-    const transaction = await exec.api.tx.assets.forceClearMetadata(id);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async forceClearTokenMetadata (exec, keypair, id) {
+    const transaction = await exec.api.tx.assets.forceClearMetadata(id)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Alter the attributes of a given token.
@@ -427,20 +412,20 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} owner The new Owner of this token.
-   * @param {object} issuer The new Issuer of this token.
-   * @param {object} admin The new Admin of this token.
-   * @param {object} freezer The new Freezer of this token.
-   * @param {number} minBalance The minimum balance of this token.
-   * @param {bool} isSufficient Whether a non-zero balance of this token is deposit of sufficient.
-   * @param {bool} isFrozen Whether this token class is frozen except for permissioned/admin instructions.
+   * @param {number} id The identifier of the token. 
+   * @param {object} owner The new Owner of this token. 
+   * @param {object} issuer The new Issuer of this token. 
+   * @param {object} admin The new Admin of this token. 
+   * @param {object} freezer The new Freezer of this token. 
+   * @param {number} minBalance The minimum balance of this token. 
+   * @param {bool} isSufficient Whether a non-zero balance of this token is deposit of sufficient. 
+   * @param {bool} isFrozen Whether this token class is frozen except for permissioned/admin instructions. 
    * @returns {Promise} of transaction
    */
-  async forceTokenStatus(exec, keypair, id, owner, issuer, admin, freezer, minBalance, isSufficient, isFrozen) {
-    const transaction = await exec.api.tx.assets.forceTokenStatus(id, owner, issuer, admin, freezer, minBalance, isSufficient, isFrozen);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async forceTokenStatus (exec, keypair, id, owner, issuer, admin, freezer, minBalance, isSufficient, isFrozen) {
+    const transaction = await exec.api.tx.assets.forceTokenStatus(id, owner, issuer, admin, freezer, minBalance, isSufficient, isFrozen)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Approve an amount of token for transfer by a delegated third-party account.
@@ -460,15 +445,15 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} delegate The account to delegate permission to transfer token.
-   * @param {number} amount The amount of token that may be transferred by `delegate`.
+   * @param {number} id The identifier of the token. 
+   * @param {object} delegate The account to delegate permission to transfer token. 
+   * @param {number} amount The amount of token that may be transferred by `delegate`. 
    * @returns {Promise} of transaction
    */
-  async approveTokenTransfer(exec, keypair, id, delegate, amount) {
-    const transaction = await exec.api.tx.assets.approveTransfer(id, delegate, amount);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async approveTokenTransfer (exec, keypair, id, delegate, amount) {
+    const transaction = await exec.api.tx.assets.approveTransfer(id, delegate, amount)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Cancel all of some token approved for delegated transfer by a third-party account.
@@ -482,14 +467,14 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} delegate The account delegated permission to transfer token.
+   * @param {number} id The identifier of the token. 
+   * @param {object} delegate The account delegated permission to transfer token. 
    * @returns {Promise} of transaction
    */
-  async cancelApprovalTokenTransfer(exec, keypair, id, delegate) {
-    const transaction = await exec.api.tx.assets.cancelApproval(id, delegate);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async cancelApprovalTokenTransfer (exec, keypair, id, delegate) {
+    const transaction = await exec.api.tx.assets.cancelApproval(id, delegate)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Cancel all of some token approved for delegated transfer by a third-party account.
@@ -503,15 +488,15 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} owner The new Owner of this token.
-   * @param {object} delegate The account delegated permission to transfer token.
+   * @param {number} id The identifier of the token. 
+   * @param {object} owner The new Owner of this token. 
+   * @param {object} delegate The account delegated permission to transfer token. 
    * @returns {Promise} of transaction
    */
-  async forceCancelApprovalTokenTransfer(exec, keypair, id, owner, delegate) {
-    const transaction = await exec.api.tx.assets.forceCancelApproval(id, owner, delegate);
-    return await exec.execTransaction(keypair, transaction);
-  }
+  async forceCancelApprovalTokenTransfer (exec, keypair, id, owner, delegate) {
+    const transaction = await exec.api.tx.assets.forceCancelApproval(id, owner, delegate)
+    return await exec.execTransaction(keypair, transaction)
+  } 
 
   /**
    * Transfer some token balance from a previously delegated account to some third-party
@@ -530,15 +515,39 @@ module.exports = class Token {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} id The identifier of the token.
-   * @param {object} owner The account which previously approved for a transfer of at least `amount`.
-   * @param {object} destination The account to which the token balance of `amount` will be transferred.
-   * @param {number} amount The amount of tokens to transfer.
+   * @param {number} id The identifier of the token. 
+   * @param {object} owner The account which previously approved for a transfer of at least `amount`. 
+   * @param {object} destination The account to which the token balance of `amount` will be transferred. 
+   * @param {number} amount The amount of tokens to transfer. 
    * @returns {Promise} of transaction
    */
-  async transferTokenApproval(exec, keypair, id, owner, destination, amount) {
-    const transaction = await exec.api.tx.assets.transferApproved(id, owner, destination, amount);
-    return await exec.execTransaction(keypair, transaction);
+  async transferTokenApproval (exec, keypair, id, owner, destination, amount) {
+    const transaction = await exec.api.tx.assets.transferApproved(id, owner, destination, amount)
+    return await exec.execTransaction(keypair, transaction)
+  } 
+
+  /**
+   * Set tokens ids and costs for transactions.
+   * Origin must be root.
+   *
+   * @param {object} exec Executor class.
+   * @param {object} keypair Account's keypair. Signs transaction
+   * @param {object} tokenAndCost The set ob tokens ids and costs for transactions. 
+   * @returns {Promise} of transaction
+   */
+  async setTokensAndCosts (exec, keypair, tokenAndCost) {
+    const transaction = await exec.api.tx.idSpace.setTokenAndCost(tokenAndCost)
+    return await exec.execTransaction(keypair, transaction)
+  } 
+
+  /**
+   * Get the Token id and cost of all transactions
+   *
+   * @param {object} exec Executor class.
+   * @returns {Promise} of transaction
+   */
+  async getTokenIdAndCosts (exec) {
+    return await exec.api.query.idSpace.tokenAndCost()
   }
 
   /**
@@ -548,11 +557,11 @@ module.exports = class Token {
    * @param {string} id TokeId
    * @returns {Promise} of Transaction
    */
-  async getTokenDetails(exec, id) {
-    const tokenDetails = await exec.api.query.assets.asset(id);
-    return JSON.parse(tokenDetails);
+  async getTokenDetails (exec, id) {
+    const tokenDetails = await exec.api.query.assets.asset(id)
+    return JSON.parse(tokenDetails)
   }
-
+ 
   /**
    * Get Token metadata.
    *
@@ -560,11 +569,11 @@ module.exports = class Token {
    * @param {string} id TokeId
    * @returns {Promise} of Transaction
    */
-  async getTokenMetadata(exec, id) {
-    const metadata = await exec.api.query.assets.metadata(id);
-    return JSON.parse(metadata);
+  async getTokenMetadata (exec, id) {
+    const metadata = await exec.api.query.assets.metadata(id)
+    return JSON.parse(metadata)
   }
-
+ 
   /**
    * Get Account Token data.
    *
@@ -573,8 +582,8 @@ module.exports = class Token {
    * @param {string} who Account
    * @returns {Promise} of Transaction
    */
-  async getAccountTokenData(exec, id, who) {
-    const accountData = await exec.api.query.assets.account(id, who);
-    return JSON.parse(accountData);
+  async getAccountTokenData (exec, id, who) {
+    const accountData = await exec.api.query.assets.account(id, who)
+    return JSON.parse(accountData)
   }
-};
+}

@@ -1,11 +1,9 @@
 /* eslint-disable no-async-promise-executor */
-
-const {
-  bufferToU8a, stringToU8a, u8aConcat, u8aToHex, hexToU8a, hexToString, stringToHex,
-} = require('@polkadot/util');
+'use strict'
+const { bufferToU8a, stringToU8a, u8aConcat, u8aToHex, hexToU8a, hexToString, stringToHex } = require('@polkadot/util')
 
 // Debug
-const debug = require('debug')('did:debug:sub');
+var debug = require('debug')('did:debug:sub')
 
 /**
  * Functions dealing with the management of classes and tokens non-fungibles.
@@ -32,9 +30,9 @@ module.exports = class ClassNFTs {
    * @param {object} admin The admin of this class of tokens.
    * @returns {Promise} of transaction
    */
-  async createNFTClass(exec, keypair, classid, admin) {
-    const transaction = await exec.api.tx.classNfts.create(classid, admin);
-    return await exec.execTransaction(keypair, transaction);
+  async createNFTClass (exec, keypair, classid, admin) {
+    const transaction = await exec.api.tx.classNfts.create(classid, admin)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -57,11 +55,11 @@ module.exports = class ClassNFTs {
    * @param {number} classid The identifier of the new class of tokens.
    * @param {object} owner The admin of this class of tokens.
    * @param {bool} freeHolding The free Holdinfg of this class of tokens.
-   * @returns
+   * @returns 
    */
-  async forceCreateNFTClass(exec, keypair, classid, owner, freeHolding) {
-    const transaction = await exec.api.tx.classNfts.forceCreate(classid, owner, freeHolding);
-    return await exec.execTransaction(keypair, transaction);
+  async forceCreateNFTClass (exec, keypair, classid, owner, freeHolding) {
+    const transaction = await exec.api.tx.classNfts.forceCreate(classid, owner, freeHolding)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -80,9 +78,9 @@ module.exports = class ClassNFTs {
    * @param {object} witness Information on the instances minted in the asset class.
    * @returns {Promise} of transaction
    */
-  async destroyNFTClass(exec, keypair, classid, witness) {
-    const transaction = await exec.api.tx.classNfts.destroy(classid, witness);
-    return await exec.execTransaction(keypair, transaction);
+  async destroyNFTClass (exec, keypair, classid, witness) {
+    const transaction = await exec.api.tx.classNfts.destroy(classid, witness)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -103,9 +101,9 @@ module.exports = class ClassNFTs {
    * @param {object} owner The initial owner of the minted asset.
    * @returns {Promise} of transaction
    */
-  async mintNFTInstance(exec, keypair, classid, instanceid, owner) {
-    const transaction = await exec.api.tx.classNfts.mint(classid, instanceid, owner);
-    return await exec.execTransaction(keypair, transaction);
+  async mintNFTInstance (exec, keypair, classid, instanceid, owner) {
+    const transaction = await exec.api.tx.classNfts.mint(classid, instanceid, owner)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -127,9 +125,9 @@ module.exports = class ClassNFTs {
    * @param {object} checkOwner Checks Owner.
    * @returns {Promise} of transaction
    */
-  async burnNFTInstance(exec, keypair, classid, instanceid, checkOwner) {
-    const transaction = await exec.api.tx.classNfts.burn(classid, instanceid, checkOwner);
-    return await exec.execTransaction(keypair, transaction);
+  async burnNFTInstance (exec, keypair, classid, instanceid, checkOwner) {
+    const transaction = await exec.api.tx.classNfts.burn(classid, instanceid, checkOwner)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -149,14 +147,14 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The identifier of the new class of tokens.
-   * @param {object} instanceid The instance value of the asset to be minted.
-   * @param {object} dest The account to receive ownership of the asset.
+   * @param {number} classid The identifier of the new class of tokens. 
+   * @param {object} instanceid The instance value of the asset to be minted. 
+   * @param {object} dest The account to receive ownership of the asset. 
    * @returns {Promise} of transaction
    */
-  async transferNFTInstance(exec, keypair, classid, instanceid, dest) {
-    const transaction = await exec.api.tx.classNfts.transfer(classid, instanceid, dest);
-    return await exec.execTransaction(keypair, transaction);
+  async transferNFTInstance (exec, keypair, classid, instanceid, dest) {
+    const transaction = await exec.api.tx.classNfts.transfer(classid, instanceid, dest)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -178,13 +176,13 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The identifier of the new class of tokens.
-   * @param {object} instances The instances of the asset class whose deposits will be reevaluated.
+   * @param {number} classid The identifier of the new class of tokens. 
+   * @param {object} instances The instances of the asset class whose deposits will be reevaluated. 
    * @returns {Promise} of transaction
    */
-  async redepositNFTInstances(exec, keypair, classid, instances) {
-    const transaction = await exec.api.tx.classNfts.redeposit(classid, instances);
-    return await exec.execTransaction(keypair, transaction);
+  async redepositNFTInstances (exec, keypair, classid, instances) {
+    const transaction = await exec.api.tx.classNfts.redeposit(classid, instances)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -199,13 +197,13 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset to be frozen.
-   * @param {object} instanceid The instance of the asset to be frozen.
+   * @param {number} classid The class of the asset to be frozen. 
+   * @param {object} instanceid The instance of the asset to be frozen. 
    * @returns {Promise} of transaction
    */
-  async freezeNFTInstance(exec, keypair, classid, instanceid) {
-    const transaction = await exec.api.tx.classNfts.freeze(classid, instanceid);
-    return await exec.execTransaction(keypair, transaction);
+  async freezeNFTInstance (exec, keypair, classid, instanceid) {
+    const transaction = await exec.api.tx.classNfts.freeze(classid, instanceid)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -220,13 +218,13 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset to be frozen.
-   * @param {object} instanceid The instance of the asset to be frozen.
+   * @param {number} classid The class of the asset to be frozen. 
+   * @param {object} instanceid The instance of the asset to be frozen. 
    * @returns {Promise} of transaction
    */
-  async unfrozenNFTInstance(exec, keypair, classid, instanceid) {
-    const transaction = await exec.api.tx.classNfts.thaw(classid, instanceid);
-    return await exec.execTransaction(keypair, transaction);
+  async unfrozenNFTInstance (exec, keypair, classid, instanceid) {
+    const transaction = await exec.api.tx.classNfts.thaw(classid, instanceid)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -240,12 +238,12 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset to be frozen.
+   * @param {number} classid The class of the asset to be frozen. 
    * @returns {Promise} of transaction
    */
-  async freezeNFTClass(exec, keypair, classid) {
-    const transaction = await exec.api.tx.classNfts.freezeClass(classid);
-    return await exec.execTransaction(keypair, transaction);
+  async freezeNFTClass (exec, keypair, classid) {
+    const transaction = await exec.api.tx.classNfts.freezeClass(classid)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -259,12 +257,12 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset to be unfrozen.
+   * @param {number} classid The class of the asset to be unfrozen. 
    * @returns {Promise} of transaction
    */
-  async unfrozenNFTClass(exec, keypair, classid) {
-    const transaction = await exec.api.tx.classNfts.thawClass(classid);
-    return await exec.execTransaction(keypair, transaction);
+  async unfrozenNFTClass (exec, keypair, classid) {
+    const transaction = await exec.api.tx.classNfts.thawClass(classid)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -279,13 +277,13 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset to be transfer.
+   * @param {number} classid The class of the asset to be transfer. 
    * @param {object} owner The new Owner of this asset class.
    * @returns {Promise} of transaction
    */
-  async transferOwnershipOfNFTClass(exec, keypair, classid, owner) {
-    const transaction = await exec.api.tx.classNfts.transferOwnership(classid, owner);
-    return await exec.execTransaction(keypair, transaction);
+  async transferOwnershipOfNFTClass (exec, keypair, classid, owner) {
+    const transaction = await exec.api.tx.classNfts.transferOwnership(classid, owner)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -302,15 +300,15 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset to be frozen.
+   * @param {number} classid The class of the asset to be frozen. 
    * @param {object} issuer The new Issuer of this asset class.
    * @param {object} admin The new AdminOwner of this asset class.
    * @param {object} freezer The new Freezer of this asset class.
    * @returns {Promise} of transaction
    */
-  async setTeamOfNFTClass(exec, keypair, classid, issuer, admin, freezer) {
-    const transaction = await exec.api.tx.classNfts.setTeam(classid, issuer, admin, freezer);
-    return await exec.execTransaction(keypair, transaction);
+  async setTeamOfNFTClass (exec, keypair, classid, issuer, admin, freezer) {
+    const transaction = await exec.api.tx.classNfts.setTeam(classid, issuer, admin, freezer)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -326,14 +324,14 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset to be frozen.
+   * @param {number} classid The class of the asset to be frozen. 
    * @param {object} instanceid The instance of the asset to be approved for delegated transfer..
    * @param {object} delegate The account to delegate permission to transfer the asset.
    * @returns {Promise} of transaction
    */
-  async approveTransferOfNFTInstance(exec, keypair, classid, instanceid, delegate) {
-    const transaction = await exec.api.tx.classNfts.approveTransfer(classid, instanceid, delegate);
-    return await exec.execTransaction(keypair, transaction);
+  async approveTransferOfNFTInstance (exec, keypair, classid, instanceid, delegate) {
+    const transaction = await exec.api.tx.classNfts.approveTransfer(classid, instanceid, delegate)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -354,14 +352,14 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset to be frozen.
+   * @param {number} classid The class of the asset to be frozen. 
    * @param {object} instanceid The instance of the asset to be approved for delegated transfer..
    * @param {object} maybeCheckDelegate Check delegate.
    * @returns {Promise} of transaction
    */
-  async cancelApprovalOfTransferOfNFTInstance(exec, keypair, classid, instanceid, maybeCheckDelegate) {
-    const transaction = await exec.api.tx.classNfts.cancelApproval(classid, instanceid, maybeCheckDelegate);
-    return await exec.execTransaction(keypair, transaction);
+  async cancelApprovalOfTransferOfNFTInstance (exec, keypair, classid, instanceid, maybeCheckDelegate) {
+    const transaction = await exec.api.tx.classNfts.cancelApproval(classid, instanceid, maybeCheckDelegate)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -383,7 +381,7 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset.
+   * @param {number} classid The class of the asset. 
    * @param {object} owner The new Owner of this asset.
    * @param {object} issuer The new Owner of this asset.
    * @param {object} admin The new Owner of this asset.
@@ -392,9 +390,9 @@ module.exports = class ClassNFTs {
    * @param {object} isFrozen Frozen?.
    * @returns {Promise} of transaction
    */
-  async forceTokenStatusOfNFTClass(exec, keypair, classid, owner, issuer, admin, freezer, freeHolding, isFrozen) {
-    const transaction = await exec.api.tx.classNfts.forceAssetStatus(classid, owner, issuer, admin, freezer, freeHolding, isFrozen);
-    return await exec.execTransaction(keypair, transaction);
+  async forceTokenStatusOfNFTClass (exec, keypair, classid, owner, issuer, admin, freezer, freeHolding, isFrozen) {
+    const transaction = await exec.api.tx.classNfts.forceAssetStatus(classid, owner, issuer, admin, freezer, freeHolding, isFrozen)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -416,15 +414,15 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset.
+   * @param {number} classid The class of the asset. 
    * @param {object} maybeInstance The identifier of the asset instance whose metadata to set.
    * @param {object} key The key of the attribute.
    * @param {object} value The value to which to set the attribute.
    * @returns {Promise} of transaction
    */
-  async setAttributeOfNFT(exec, keypair, classid, maybeInstance, key, value) {
-    const transaction = await exec.api.tx.classNfts.setAttribute(classid, maybeInstance, key, value);
-    return await exec.execTransaction(keypair, transaction);
+  async setAttributeOfNFT (exec, keypair, classid, maybeInstance, key, value) {
+    const transaction = await exec.api.tx.classNfts.setAttribute(classid, maybeInstance, key, value)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -446,14 +444,14 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset.
+   * @param {number} classid The class of the asset. 
    * @param {object} maybeInstance The identifier of the asset instance whose metadata to set.
    * @param {object} key The key of the attribute.
    * @returns {Promise} of transaction
    */
-  async clearAttributeOfNFT(exec, keypair, classid, maybeInstance, key) {
-    const transaction = await exec.api.tx.classNfts.clearAttribute(classid, maybeInstance, key);
-    return await exec.execTransaction(keypair, transaction);
+  async clearAttributeOfNFT (exec, keypair, classid, maybeInstance, key) {
+    const transaction = await exec.api.tx.classNfts.clearAttribute(classid, maybeInstance, key)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -475,15 +473,15 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset.
+   * @param {number} classid The class of the asset. 
    * @param {number} instanceid The identifier of the asset instance whose metadata to set.
    * @param {object} data The general information of this asset. Limited in length by `StringLimit`.
    * @param {object} isFrozen Frozen?.
    * @returns {Promise} of transaction
    */
-  async setMetadataOfNFTInstance(exec, keypair, classid, instanceid, data, isFrozen) {
-    const transaction = await exec.api.tx.classNfts.setMetadata(classid, instanceid, data, isFrozen);
-    return await exec.execTransaction(keypair, transaction);
+  async setMetadataOfNFTInstance (exec, keypair, classid, instanceid, data, isFrozen) {
+    const transaction = await exec.api.tx.classNfts.setMetadata(classid, instanceid, data, isFrozen)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -501,13 +499,13 @@ module.exports = class ClassNFTs {
    *
    * @param {object} exec Executor class.
    * @param {object} keypair Account's keypair. Signs transaction
-   * @param {number} classid The class of the asset.
+   * @param {number} classid The class of the asset. 
    * @param {number} instanceid The identifier of the asset instance whose metadata to clear.
    * @returns {Promise} of transaction
    */
-  async clearMetadataOfNFTInstance(exec, keypair, classid, instanceid) {
-    const transaction = await exec.api.tx.classNfts.clearMetadata(classid, instanceid);
-    return await exec.execTransaction(keypair, transaction);
+  async clearMetadataOfNFTInstance (exec, keypair, classid, instanceid) {
+    const transaction = await exec.api.tx.classNfts.clearMetadata(classid, instanceid)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -533,9 +531,9 @@ module.exports = class ClassNFTs {
    * @param {object} isFrozen Frozen?.
    * @returns {Promise} of transaction
    */
-  async setMetadataOfNFTClass(exec, keypair, classid, data, isFrozen) {
-    const transaction = await exec.api.tx.classNfts.setClassMetadata(classid, data, isFrozen);
-    return await exec.execTransaction(keypair, transaction);
+  async setMetadataOfNFTClass (exec, keypair, classid, data, isFrozen) {
+    const transaction = await exec.api.tx.classNfts.setClassMetadata(classid, data, isFrozen)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -555,9 +553,9 @@ module.exports = class ClassNFTs {
    * @param {number} classid The class of the asset.
    * @returns {Promise} of transaction
    */
-  async clearMetadataOfNFTClass(exec, keypair, classid) {
-    const transaction = await exec.api.tx.classNfts.clearClassMetadata(classid);
-    return await exec.execTransaction(keypair, transaction);
+  async clearMetadataOfNFTClass (exec, keypair, classid) {
+    const transaction = await exec.api.tx.classNfts.clearClassMetadata(classid)
+    return await exec.execTransaction(keypair, transaction)
   }
 
   /**
@@ -567,9 +565,9 @@ module.exports = class ClassNFTs {
    * @param {string} classid NFT Class Id
    * @returns {object} Class Details
    */
-  async getNFTClassDetails(exec, classid) {
-    const classDetails = await exec.api.query.classNfts.class(classid);
-    return JSON.parse(classDetails);
+  async getNFTClassDetails (exec, classid) {
+    const classDetails = await exec.api.query.classNfts.class(classid)
+    return JSON.parse(classDetails)
   }
 
   /**
@@ -581,12 +579,12 @@ module.exports = class ClassNFTs {
    * @param {string} instanceid Instance Id
    * @returns {object} Class Details
    */
-  async checkNFTOwnership(exec, who, classid, instanceid) {
-    const result = await exec.api.query.classNfts.account(who, classid, instanceid);
+  async checkNFTOwnership (exec, who, classid, instanceid) {
+    const result = await exec.api.query.classNfts.account(who, classid, instanceid)
     if (result.isNone) {
-      return false;
+      return false
     }
-    return result.unwrap();
+    return result.unwrap()
   }
 
   /**
@@ -596,14 +594,14 @@ module.exports = class ClassNFTs {
    * @param {object} exec Executor class.
    * @returns {object} List of all NFT instances classed by Account and Class Id
    */
-  async getAllNFTs(exec) {
-    const nftsEntries = await exec.api.query.classNfts.accountNfts.entries();
+  async getAllNFTs (exec) {
+    const nftsEntries = await exec.api.query.classNfts.accountNfts.entries()
     // accounTest(AccountId, NtfsClassId) for the types of the key args
-    const nfts = [];
+    const nfts = []
     nftsEntries.forEach(([{ args: [acc, klass] }, value]) => {
-      nfts.push({ account: acc.toHuman(), class: klass.toHuman(), instances: value.toHuman() });
-    });
-    return nfts;
+      nfts.push({ account: acc.toHuman(), class: klass.toHuman(), instances: value.toHuman() })
+    })
+    return nfts
   }
 
   /**
@@ -614,13 +612,13 @@ module.exports = class ClassNFTs {
    * @param {string} who Account
    * @returns {object} Class Details
    */
-  async getNFTsFromAccount(exec, who) {
-    const nftsEntries = await exec.api.query.classNfts.accountNfts.entries(who);
-    const nfts = [];
+  async getNFTsFromAccount (exec, who) {
+    const nftsEntries = await exec.api.query.classNfts.accountNfts.entries(who)
+    const nfts = []
     nftsEntries.forEach(([{ args: [acc, klass] }, value]) => {
-      nfts.push({ account: acc.toHuman(), class: klass.toHuman(), instances: value.toHuman() });
-    });
-    return nfts;
+      nfts.push({ account: acc.toHuman(), class: klass.toHuman(), instances: value.toHuman() })
+    })
+    return nfts
   }
 
   /**
@@ -631,9 +629,9 @@ module.exports = class ClassNFTs {
    * @param {string} instanceid Instance Id
    * @returns {object} Class Details
    */
-  async getNFTOwner(exec, classid, instanceid) {
-    const nfts = await exec.api.query.classNfts.asset(classid, instanceid);
-    return JSON.parse(nfts);
+  async getNFTOwner (exec, classid, instanceid) {
+    const nfts = await exec.api.query.classNfts.asset(classid, instanceid)
+    return JSON.parse(nfts)
   }
 
   /**
@@ -643,9 +641,9 @@ module.exports = class ClassNFTs {
    * @param {string} classid Class Id
    * @returns {object} Class Details
    */
-  async getNFTClassMetadata(exec, classid) {
-    const nfts = await exec.api.query.classNfts.classMetadataOf(classid);
-    return JSON.parse(nfts);
+  async getNFTClassMetadata (exec, classid) {
+    const nfts = await exec.api.query.classNfts.classMetadataOf(classid)
+    return JSON.parse(nfts)
   }
 
   /**
@@ -656,9 +654,9 @@ module.exports = class ClassNFTs {
    * @param {string} instanceid Instance Id
    * @returns {object} Class Details
    */
-  async getNFTInstanceMetadata(exec, classid, instanceid) {
-    const nfts = await exec.api.query.classNfts.instanceMetadataOf(classid, instanceid);
-    return JSON.parse(nfts);
+  async getNFTInstanceMetadata (exec, classid, instanceid) {
+    const nfts = await exec.api.query.classNfts.instanceMetadataOf(classid, instanceid)
+    return JSON.parse(nfts)
   }
 
   /**
@@ -670,8 +668,8 @@ module.exports = class ClassNFTs {
    * @param {string} key Attribute key
    * @returns {object} Class Details
    */
-  async getNFTAttribute(exec, classid, instanceid, key) {
-    const nfts = await exec.api.query.classNfts.attribute(classid, instanceid, key);
-    return JSON.parse(nfts);
+  async getNFTAttribute (exec, classid, instanceid, key) {
+    const nfts = await exec.api.query.classNfts.attribute(classid, instanceid, key)
+    return JSON.parse(nfts)
   }
-};
+}
